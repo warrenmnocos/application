@@ -1,0 +1,74 @@
+spring:
+    profiles: default
+    application:
+        name: account
+    cloud:
+        config:
+            uri: http://localhost:8080
+            failFast: true
+            password: uiiui747h74f4e74eu45748bb44rfn7845nhd74ndeundnd63rgff6r
+            username: user
+            
+---
+spring:
+    profiles: development
+    application:
+        name: account
+    jpa:
+        show-sql: true
+        database: h2
+        generate-ddl: true
+        database-platform: H2
+    datasource:
+        hikari:
+            maximum-pool-size: 20
+            pool-name: datasource-development
+        type: com.zaxxer.hikari.HikariDataSource
+    cache:
+        jcache:
+            provider: org.ehcache.jsr107.EhcacheCachingProvider
+        cache-names: account
+        type: jcache
+security:
+    user:
+        password: none
+    oauth2:
+        sso:
+            protocol: http
+            address: localhost
+            port: 80
+            context-path: /security
+        client:
+            client-id: d56h2sf5c5drsdgr4xpl234cm085021r
+            client-secret: of7ho3vc86t00hd6bg7qrwpl12h754pl
+            access-token-uri: ${security.oauth2.sso.protocol}://${security.oauth2.sso.address}:${security.oauth2.sso.port}${security.oauth2.sso.context-path}/oauth/token
+            user-authorization-uri: ${security.oauth2.sso.protocol}://${security.oauth2.sso.address}:${security.oauth2.sso.port}${security.oauth2.sso.context-path}/oauth/authorize
+        resource:
+            token-info-uri: ${security.oauth2.sso.protocol}://${security.oauth2.sso.address}:${security.oauth2.sso.port}${security.oauth2.sso.context-path}/oauth/check_token
+server:
+    port: 8082
+    context-path: /account
+    address: localhost
+management:
+    context-path: /admin
+
+---
+spring:
+    profiles: integration
+    application:
+        name: account
+eureka:
+    instance:
+        protocol: http
+        ip-address: localhost
+        port: 8081
+        context-path: /registry
+        hostname: localhost
+    client:
+        service-url:
+            defaultZone: ${eureka.instance.protocol}://${eureka.instance.ip-address}:${eureka.instance.port}${eureka.instance.context-path}/eureka/
+    
+---
+spring:
+    profiles:
+        active: development, integration

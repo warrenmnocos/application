@@ -1,0 +1,46 @@
+spring:
+    profiles: default
+    application:
+        name: gateway
+    cloud:
+        config:
+            uri: http://localhost:8080
+            failFast: true
+            password: uiiui747h74f4e74eu45748bb44rfn7845nhd74ndeundnd63rgff6r
+            username: user
+            
+---
+spring:
+    profiles: development
+    application:
+        name: gateway
+server:
+    port: 80
+    context-path: /gateway
+    address: localhost
+management:
+    context-path: /admin
+
+---
+spring:
+    profiles: integration
+    application:
+        name: gateway
+eureka:
+    instance:
+        protocol: http
+        ip-address: localhost
+        port: 8081
+        hostname: localhost
+        context-path: /registry
+        prefer-ip-address: true
+    client:
+        service-url:
+            defaultZone: ${eureka.instance.protocol}://${eureka.instance.ip-address}:${eureka.instance.port}${eureka.instance.context-path}/eureka/
+        register-with-eureka: false
+        fetch-registry: false
+    
+---
+spring:
+    profiles:
+        active: development, integration
