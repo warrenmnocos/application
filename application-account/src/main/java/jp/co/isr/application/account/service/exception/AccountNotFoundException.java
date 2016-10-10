@@ -15,18 +15,17 @@
  */
 package jp.co.isr.application.account.service.exception;
 
-import javax.persistence.EntityNotFoundException;
 import jp.co.isr.application.account.model.entity.Account;
 
 /**
- * A {@link RuntimeException} thrown when an {@link Account} is not found in
+ * An {@link Exception} thrown when an {@link Account} is not found in
  * repository.
  *
  * @author Warren Nocos
  * @since 1.0
  * @version 1.0
  */
-public class AccountNotFoundException extends EntityNotFoundException {
+public class AccountNotFoundException extends RuntimeException {
 
     /**
      * Constructs a new exception with the specified detail message.

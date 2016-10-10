@@ -15,24 +15,38 @@
  */
 package jp.co.isr.application.account.service.impl;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.Month;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import jp.co.isr.application.account.model.entity.Account;
 import jp.co.isr.application.account.model.entity.AccountClientDetails;
 import jp.co.isr.application.account.model.entity.AccountClientGrantedAuthority;
+import jp.co.isr.application.account.model.entity.AccountLoginAudit;
 import jp.co.isr.application.account.model.entity.AccountUserDetails;
 import jp.co.isr.application.account.model.entity.AccountUserGrantedAuthority;
 import jp.co.isr.application.account.repository.AccountClientDetailsRepository;
 import jp.co.isr.application.account.repository.AccountClientGrantedAuthorityRepository;
+import jp.co.isr.application.account.repository.AccountLoginAuditRepository;
+import jp.co.isr.application.account.repository.AccountRepository;
 import jp.co.isr.application.account.repository.AccountUserDetailsRepository;
 import jp.co.isr.application.account.repository.AccountUserGrantedAuthorityRepository;
 import jp.co.isr.application.account.service.DataPopulatorService;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,26 +58,41 @@ import org.springframework.transaction.annotation.Transactional;
  * @version 1.0
  */
 @Service
-@Profile("installation")
+@Profile("initialization")
 @Transactional(readOnly = true)
 public class DataPopulatorServiceImpl implements DataPopulatorService {
+
+    protected final AccountRepository accountRepository;
 
     protected final AccountUserGrantedAuthorityRepository accountUserGrantedAuthorityRepository;
 
     protected final AccountUserDetailsRepository accountUserDetailsRepository;
 
+    protected final AccountLoginAuditRepository accountLoginAuditRepository;
+
     protected final AccountClientGrantedAuthorityRepository accountClientGrantedAuthorityRepository;
 
     protected final AccountClientDetailsRepository accountClientDetailsRepository;
 
-    @Inject
-    public DataPopulatorServiceImpl(AccountUserGrantedAuthorityRepository accountUserGrantedAuthorityRepository,
-            AccountUserDetailsRepository accountUserDetailsRepository, AccountClientGrantedAuthorityRepository accountClientGrantedAuthorityRepository,
-            AccountClientDetailsRepository accountClientDetailsRepository) {
+    protected final PasswordEncoder passwordEncoder;
+
+    protected final Random random;
+
+    public DataPopulatorServiceImpl(AccountRepository accountRepository,
+            AccountUserGrantedAuthorityRepository accountUserGrantedAuthorityRepository,
+            AccountUserDetailsRepository accountUserDetailsRepository,
+            AccountLoginAuditRepository accountLoginAuditRepository,
+            AccountClientGrantedAuthorityRepository accountClientGrantedAuthorityRepository,
+            AccountClientDetailsRepository accountClientDetailsRepository,
+            PasswordEncoder passwordEncoder) {
+        this.accountRepository = accountRepository;
         this.accountUserGrantedAuthorityRepository = accountUserGrantedAuthorityRepository;
         this.accountUserDetailsRepository = accountUserDetailsRepository;
+        this.accountLoginAuditRepository = accountLoginAuditRepository;
         this.accountClientGrantedAuthorityRepository = accountClientGrantedAuthorityRepository;
         this.accountClientDetailsRepository = accountClientDetailsRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.random = new Random();
     }
 
     /**
@@ -72,7 +101,9 @@ public class DataPopulatorServiceImpl implements DataPopulatorService {
     @PostConstruct
     public void populate() {
         populateAccountUserGrantedAuthority();
+        populateAccount();
         populateAccountUserDetails();
+        populateAccountLoginAudit();
         populateAccountClientGrantedAuthority();
         populateAccountClientDetailsService();
     }
@@ -94,30 +125,91 @@ public class DataPopulatorServiceImpl implements DataPopulatorService {
      */
     @Override
     @Transactional
+    public void populateAccount() {
+        Stream.of(// Same first name, middle name, and last name
+                "wa@gmail.com,Warren,Lo,Nocos,ANONYMOUS",
+                "war@gmail.com,Warren,Lo,Nocos,ANONYMOUS",
+                "warr@gmail.com,Warren,Lo,Nocos,ANONYMOUS",
+                "warre@gmail.com,Warren,Lo,Nocos,ANONYMOUS",
+                // Same middle name, and last name
+                "loulonocos@gmail.com,Lou,Lo,Nocos,ANONYMOUS",
+                "ricalonocos@gmail.com,Rica,Lo,Nocos,ANONYMOUS",
+                "tinalonocos@gmail.com,Tina,Lo,Nocos,ANONYMOUS",
+                "alenlonocos@gmail.com,Alen,Lo,Nocos,ANONYMOUS",
+                // Same first name and middle name
+                "warrenlosa@gmail.com,Warren,Lo,Sa,ANONYMOUS",
+                "warrenloprex@gmail.com,Warren,Lo,Prex,ANONYMOUS",
+                "warrenloantonio@gmail.com,Warren,Lo,Antonio,ANONYMOUS",
+                "warrenlokortana@gmail.com,Warren,Lo,Kortana,ANONYMOUS",
+                // Same first name, and last name
+                "warrenveranocos@gmail.com,Warren,Vera,Nocos,ANONYMOUS",
+                "warrenloiusnocos@gmail.com,Warren,Loius,Nocos,ANONYMOUS",
+                "warrenquizanocos@gmail.com,Warren,Quiza,Nocos,ANONYMOUS",
+                "warrenwevicknocos@gmail.com,Warren,Wevick,Nocos,ANONYMOUS")
+                .map(account -> account.split(","))
+                .map(accountDetails -> {
+                    Account account = new Account();
+                    account.setEmail(accountDetails[0]);
+                    account.setFirstName(accountDetails[1]);
+                    account.setMiddleName(accountDetails[2]);
+                    account.setLastName(accountDetails[3]);
+                    account.setAddresses(Collections.emptyMap());
+                    account.setContacts(Collections.emptyMap());
+                    account.setCreator(accountDetails[4]);
+                    return account;
+                })
+                .forEach(accountRepository::save);
+    }
+
+    /**
+     * {@inheritDoc }
+     */
+    @Override
+    @Transactional
     public void populateAccountUserDetails() {
-        
-        
-        
-        Set<AccountUserGrantedAuthority> accountUserGrantedAuthorities;
-        accountUserGrantedAuthorities = StreamSupport.stream(accountUserGrantedAuthorityRepository.findAll().spliterator(), true)
+        Set<AccountUserGrantedAuthority> allAuthorities;
+        allAuthorities = StreamSupport.stream(accountUserGrantedAuthorityRepository.findAll().spliterator(), true)
                 .collect(Collectors.toSet());
-        accountUserDetailsRepository.save(Stream.of("admin,1234,true", "2,warren,1234,true")
-                .map(userDetails -> userDetails.split(","))
-                .map(userDetails -> new AccountUserDetails(userDetails[0], userDetails[1], accountUserGrantedAuthorities, Boolean.parseBoolean(userDetails[2])))
-                .peek(userDetails -> userDetails.setCreator("ANONYMOUS"))
-                .collect(Collectors.toSet()));
-        accountUserGrantedAuthorities.removeIf(accountUserGrantedAuthority -> accountUserGrantedAuthority.getAuthority().equals("ROLE_ADMIN"));
-        accountUserDetailsRepository.save(Stream.of("3,stockholder,1234,true", "4,kirby,1234,true")
-                .map(userDetails -> userDetails.split(","))
-                .map(userDetails -> new AccountUserDetails(userDetails[0], userDetails[1], accountUserGrantedAuthorities, Boolean.parseBoolean(userDetails[2])))
-                .peek(userDetails -> userDetails.setCreator("ANONYMOUS"))
-                .collect(Collectors.toSet()));
-        accountUserGrantedAuthorities.removeIf(accountUserGrantedAuthority -> accountUserGrantedAuthority.getAuthority().equals("ROLE_STOCKTAKER"));
-        accountUserDetailsRepository.save(Stream.of("5,user,1234,true", "6,mario,1234,true")
-                .map(userDetails -> userDetails.split(","))
-                .map(userDetails -> new AccountUserDetails(userDetails[0], userDetails[1], accountUserGrantedAuthorities, Boolean.parseBoolean(userDetails[2])))
-                .peek(userDetails -> userDetails.setCreator("ANONYMOUS"))
-                .collect(Collectors.toSet()));
+        Set<AccountUserGrantedAuthority> adminAuthority;
+        adminAuthority = allAuthorities.stream()
+                .filter(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_USER"))
+                .collect(Collectors.toSet());
+        Set<AccountUserGrantedAuthority> userAuthority;
+        userAuthority = allAuthorities.stream()
+                .filter(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_USER"))
+                .collect(Collectors.toSet());
+        List<Set<AccountUserGrantedAuthority>> athoritiesCollections;
+        athoritiesCollections = Arrays.asList(allAuthorities, adminAuthority, userAuthority);
+        accountRepository.findAllAsStream()
+                .map(account -> {
+                    return new AccountUserDetails(account.getEmail(), passwordEncoder.encode("1234"),
+                            athoritiesCollections.get(random.nextInt(athoritiesCollections.size())), true);
+                })
+                .forEach(accountUserDetailsRepository::save);
+    }
+
+    /**
+     * {@inheritDoc }
+     */
+    @Override
+    @Transactional
+    public void populateAccountLoginAudit() {
+        Date[] loginDates = new Date[30];
+        for (int index = 0; index < loginDates.length; index++) {
+            loginDates[index] = Date.from(ZonedDateTime.of(
+                    LocalDate.of(2016, Month.SEPTEMBER, index + 1),
+                    LocalTime.MIN, ZoneId.systemDefault()).toInstant());
+        }
+        accountRepository.findAllAsStream()
+                .forEach(account -> {
+                    for (Date loginDate : loginDates) {
+                        AccountLoginAudit accountLoginAudit = new AccountLoginAudit(account);
+                        accountLoginAuditRepository.save(accountLoginAudit);
+                        // Overwrite audited loginTime
+                        accountLoginAudit.setLoginTime(loginDate);
+                        accountLoginAuditRepository.save(accountLoginAudit);
+                    }
+                });
     }
 
     /**

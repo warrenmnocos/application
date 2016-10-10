@@ -4,10 +4,6 @@ spring:
         name: config
     cloud:
         config:
-            uri: http://localhost:8080
-            failFast: true
-            password: uiiui747h74f4e74eu45748bb44rfn7845nhd74ndeundnd63rgff6r
-            username: user
             server:
                 git:
                     uri: https://github.com/warrenmnocos/application-config
@@ -16,6 +12,12 @@ security:
         password: uiiui747h74f4e74eu45748bb44rfn7845nhd74ndeundnd63rgff6r
     basic:
         enabled: true
+server:
+    port: 8080
+    context-path: /config
+    address: 0.0.0.0
+management:
+    context-path: /admin
             
 ---
 spring:
@@ -56,4 +58,4 @@ eureka:
 ---
 spring:
     profiles:
-        active: development, integration
+        active: default

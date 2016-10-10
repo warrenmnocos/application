@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 FROM openjdk:8
-ADD nb-springboot-docker.jar app.jar
+MAINTAINER Warren Nocos <warrenmnocos@gmail.com>
+ADD application-registry-1.0.war app.war
 EXPOSE 8081
-ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/app.jar"]
+ENTRYPOINT ["java","-jar","/app.war"]

@@ -18,7 +18,6 @@ package jp.co.isr.application.account.service;
 import jp.co.isr.application.account.model.entity.Account;
 import jp.co.isr.application.account.model.entity.AccountClientDetails;
 import jp.co.isr.application.account.model.entity.AccountClientGrantedAuthority;
-import jp.co.isr.application.account.model.entity.AccountLoginAudit;
 import jp.co.isr.application.account.model.entity.AccountUserDetails;
 import jp.co.isr.application.account.model.entity.AccountUserGrantedAuthority;
 
@@ -38,10 +37,19 @@ public interface DataPopulatorService {
     void populateAccountUserGrantedAuthority();
 
     /**
-     * Populate
-     * {@link Account}, {@link AccountUserDetails}, {@link AccountLoginAudit}.
+     * Populates {@link Account}
+     */
+    void populateAccount();
+
+    /**
+     * Populates {@link AccountUserDetails}.
      */
     void populateAccountUserDetails();
+
+    /**
+     * Populates {@link AccountLoginAudits}.
+     */
+    void populateAccountLoginAudit();
 
     /**
      * Populates {@link AccountClientGrantedAuthority}.

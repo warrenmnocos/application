@@ -17,6 +17,7 @@ package jp.co.isr.application.account.service.impl;
 
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.persistence.EntityNotFoundException;
@@ -88,6 +89,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional
     public void deleteAccountById(long id) {
+        getCurrentAccount();
         accountRepository.delete(id);
     }
 
@@ -98,6 +100,7 @@ public class AccountServiceImpl implements AccountService {
     @Validated
     @Transactional
     public void deleteAccountByEmail(@NotNull String email) {
+        getCurrentAccount();
         accountRepository.deleteByEmail(email);
     }
 
@@ -106,20 +109,20 @@ public class AccountServiceImpl implements AccountService {
      */
     @Override
     public Set<AccountDto> findAllAccounts() {
-        return accountRepository.findAllAsStream()
-                .map(accountDtoAccountConverterService::toAccountDto)
-                .collect(Collectors.toSet());
+        return findAllAccounts(0, Integer.MAX_VALUE);
     }
 
     /**
      * {@inheritDoc }
      */
     @Override
+    @Validated
     public Set<AccountDto> findAllAccounts(
             @NotNull Integer page, @NotNull Integer pageSize) {
-        return accountRepository.findAllAsPagedStream(new PageRequest(page, pageSize))
-                .map(accountDtoAccountConverterService::toAccountDto)
-                .collect(Collectors.toSet());
+        try (Stream<AccountDto> accounts = accountRepository.findAllAsPagedStream(new PageRequest(page, pageSize))
+                .map(accountDtoAccountConverterService::toAccountDto)) {
+            return accounts.collect(Collectors.toSet());
+        }
     }
 
     /**
@@ -136,6 +139,7 @@ public class AccountServiceImpl implements AccountService {
      * {@inheritDoc }
      */
     @Override
+    @Validated
     public AccountDto findAccountByEmail(@NotNull String email) {
         return accountRepository.findByEmail(email)
                 .map(accountDtoAccountConverterService::toAccountDto)
@@ -156,6 +160,7 @@ public class AccountServiceImpl implements AccountService {
             return accountRepository.findByEmail(accountUserDetails.getUsername())
                     .map(accountDtoAccountConverterService::toAccountDto)
                     .orElseThrow(() -> {
+                        // Principal invalid, clear security context
                         SecurityContextHolder.clearContext();
                         return new SecurityException("Authentication is required to access this service");
                     });
@@ -170,6 +175,7 @@ public class AccountServiceImpl implements AccountService {
     @Validated
     @Transactional
     public void saveAccount(@NotNull AccountWithUserDetailsDto accountWithCredentialsDto) {
+        getCurrentAccount();
         accountRepository.save(accountDtoAccountConverterService.toAccount(accountWithCredentialsDto));
         accountUserDetailsRepository.save(accountDtoAccountConverterService.toAccountUserDetails(accountWithCredentialsDto));
     }
@@ -181,7 +187,7 @@ public class AccountServiceImpl implements AccountService {
     @Validated
     @Transactional
     public void updateAccount(@NotNull AccountWithUserDetailsDto accountWithCredentialsDto) {
-        AccountDto currentAccount = getCurrentAccount();
+        getCurrentAccount();
         accountRepository.findById(accountWithCredentialsDto.getId())
                 .ifPresent(account -> {
                     // TODO

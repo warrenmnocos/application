@@ -18,26 +18,28 @@ package jp.co.isr.application.account.service.impl;
 import jp.co.isr.application.account.service.exception.AccountNotFoundException;
 import java.security.Principal;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.security.RolesAllowed;
-import javax.cache.annotation.CacheResult;
 import javax.inject.Inject;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.constraints.NotNull;
 import jp.co.isr.application.account.model.dto.AccountDto;
-import jp.co.isr.application.account.model.dto.AccountRequestDto;
 import jp.co.isr.application.account.model.entity.Account;
 import jp.co.isr.application.account.model.entity.AccountLoginAudit;
 import jp.co.isr.application.account.repository.AccountLoginAuditRepository;
 import jp.co.isr.application.account.repository.AccountRepository;
 import jp.co.isr.application.account.service.AccountLoginAuditService;
 import jp.co.isr.application.account.service.AccountModelService;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.security.authentication.event.InteractiveAuthenticationSuccessEvent;
@@ -71,7 +73,7 @@ public class AccountLoginAuditServiceImpl implements AccountLoginAuditService {
     /**
      * Used for model conversion
      */
-    protected final AccountModelService accountDtoAccountConverterService;
+    protected final AccountModelService accountModelService;
 
     /**
      * Constructs an implementation of {@link AccountLoginAuditService}.
@@ -79,17 +81,17 @@ public class AccountLoginAuditServiceImpl implements AccountLoginAuditService {
      * @param accountLoginAuditRepository the repository of
      * {@link AccountLoginAudit}
      * @param accountRepository the repository of {@link Account}
-     * @param accountDtoAccountConverterService the
-     * {@link AccountModelService} used for model conversion
+     * @param accountModelService the {@link AccountModelService} used for model
+     * conversion
      */
     @Inject
     public AccountLoginAuditServiceImpl(
             AccountLoginAuditRepository accountLoginAuditRepository,
             AccountRepository accountRepository,
-            AccountModelService accountDtoAccountConverterService) {
+            AccountModelService accountModelService) {
         this.accountLoginAuditRepository = accountLoginAuditRepository;
         this.accountRepository = accountRepository;
-        this.accountDtoAccountConverterService = accountDtoAccountConverterService;
+        this.accountModelService = accountModelService;
     }
 
     /**
@@ -104,8 +106,6 @@ public class AccountLoginAuditServiceImpl implements AccountLoginAuditService {
     @Override
     @Validated
     @RolesAllowed("ANONYMOUS")
-    @CacheEvict(allEntries = true,
-            cacheNames = {"datesWithLoginActivity"})
     public void audit(@NotNull AccountDto accountDto) throws AccountNotFoundException {
         Account account = accountRepository.findByEmail(accountDto.getEmail())
                 .orElseThrow(() -> new EntityNotFoundException("Account not found"));
@@ -118,14 +118,8 @@ public class AccountLoginAuditServiceImpl implements AccountLoginAuditService {
      * {@inheritDoc }
      */
     @Override
-    @CacheResult(cacheName = "datesWithLoginActivity")
-    public Set<LocalDate> findDatesWithLoginActivityAscendingly() {
-        return accountLoginAuditRepository.findAllLoginDate()
-                .parallel()
-                .map(Date::toInstant)
-                .map(LocalDate::from)
-                .distinct()
-                .collect(Collectors.toCollection(HashSet::new));
+    public Collection<LocalDate> findDatesWithLoginActivityAscendingly() {
+        return findDatesWithLoginActivityAscendingly(0, Integer.MAX_VALUE);
     }
 
     /**
@@ -133,47 +127,121 @@ public class AccountLoginAuditServiceImpl implements AccountLoginAuditService {
      */
     @Override
     @Validated
-    public Set<LocalDate> findDatesWithLoginActivityAscendingly(
+    public Collection<LocalDate> findDatesWithLoginActivityAscendingly(
             @NotNull Integer page, @NotNull Integer pageSize) {
-        return accountLoginAuditRepository.findAllLoginDate(new PageRequest(page, pageSize))
+        try (Stream<LocalDate> dates = accountLoginAuditRepository.findAllLoginDate(new PageRequest(page, pageSize))
                 .parallel()
                 .map(Date::toInstant)
                 .map(LocalDate::from)
-                .distinct()
-                .collect(Collectors.toCollection(HashSet::new));
+                .distinct()) {
+            return dates.collect(Collectors.toList());
+        }
     }
 
     /**
      * {@inheritDoc }
      */
     @Override
-    public Set<AccountDto> findAccountsWithLoginActivityAscendingly(
+    public Collection<AccountDto> findAccountsWithLoginActivityAscendingly(
             Optional<LocalDate> start, Optional<LocalDate> end) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return findAccountsWithLoginActivityAscendingly(start, end, 0, Integer.MAX_VALUE);
     }
 
     /**
      * {@inheritDoc }
      */
     @Override
-    public Set<AccountDto> findAccountsWithLoginActivityAscendingly(Optional<LocalDate> start, Optional<LocalDate> end, Integer page, Integer pageSize) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    @Validated
+    public Collection<AccountDto> findAccountsWithLoginActivityAscendingly(Optional<LocalDate> start,
+            Optional<LocalDate> end, @NotNull Integer page, @NotNull Integer pageSize) {
+        if (start.isPresent() && end.isPresent()) {
+            ZoneId systemZoneId = ZoneId.systemDefault();
+            Date from = Date.from(ZonedDateTime.of(start.get(), LocalTime.MIN, systemZoneId).toInstant());
+            Date to = Date.from(ZonedDateTime.of(end.get(), LocalTime.MAX, systemZoneId).toInstant());
+            checkDates(from, to);
+            return getAccountsDtoFrom(accountLoginAuditRepository.findAccountsBetweenLoginTimeInclusive(from, to, new PageRequest(page, pageSize)));
+        } else if (start.isPresent()) {
+            Date from = Date.from(ZonedDateTime.of(start.get(), LocalTime.MIN, ZoneId.systemDefault()).toInstant());
+            return getAccountsDtoFrom(accountLoginAuditRepository.findAccountsAfterLoginTimeInclusive(from, new PageRequest(page, pageSize)));
+        } else if (end.isPresent()) {
+            Date to = Date.from(ZonedDateTime.of(end.get(), LocalTime.MAX, ZoneId.systemDefault()).toInstant());
+            return getAccountsDtoFrom(accountLoginAuditRepository.findAccountsBeforeLoginTimeInclusive(to, new PageRequest(page, pageSize)));
+        } else {
+            return getAccountsDtoFrom(accountLoginAuditRepository.findAccountsWithLoginAudit(new PageRequest(page, pageSize)));
+        }
     }
 
     /**
      * {@inheritDoc }
      */
     @Override
-    public Map<AccountDto, Long> findFilteredAccountsWIthLoginAudit(AccountRequestDto accountRequestDto) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public Map<String, Long> findFilteredAccountsWithLoginAudit(Optional<LocalDate> start,
+            Optional<LocalDate> end, Collection<String> emails, Collection<String> firstNames,
+            Collection<String> middleNames, Collection<String> lastNames) {
+        return findFilteredAccountsWithLoginAudit(start, end, emails, firstNames,
+                middleNames, lastNames, 0, Integer.MAX_VALUE);
     }
 
     /**
      * {@inheritDoc }
      */
     @Override
-    public Map<AccountDto, Long> findFilteredAccountsWIthLoginAudit(AccountRequestDto accountRequestDto, Integer page, Integer pageSize) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    @Validated
+    public Map<String, Long> findFilteredAccountsWithLoginAudit(Optional<LocalDate> start,
+            Optional<LocalDate> end, Collection<String> emails, Collection<String> firstNames,
+            Collection<String> middleNames, Collection<String> lastNames,
+            @NotNull Integer page, @NotNull Integer pageSize) {
+        Date from = null, to = null;
+        if (start.isPresent() && end.isPresent()) {
+            ZoneId systemZoneId = ZoneId.systemDefault();
+            from = Date.from(ZonedDateTime.of(start.get(), LocalTime.MIN, systemZoneId).toInstant());
+            to = Date.from(ZonedDateTime.of(end.get(), LocalTime.MAX, systemZoneId).toInstant());
+            checkDates(from, to);
+        } else if (start.isPresent()) {
+            from = Date.from(ZonedDateTime.of(start.get(), LocalTime.MIN, ZoneId.systemDefault()).toInstant());
+        } else if (end.isPresent()) {
+            to = Date.from(ZonedDateTime.of(end.get(), LocalTime.MAX, ZoneId.systemDefault()).toInstant());
+        }
+        return accountLoginAuditRepository.findByFilters(from, to,
+                emails, firstNames, middleNames, lastNames,
+                new PageRequest(page, pageSize)).stream()
+                .map(AccountLoginAudit::getAccount)
+                .collect(Collectors.groupingBy(
+                        Account::getEmail,
+                        TreeMap::new,
+                        Collectors.counting()));
+    }
+
+    /**
+     * Wraps {@link Stream} of {@link Account} into Java 7s try-with-resources
+     * block for auto-closing of {@link Stream}, as pointed by Spring Data
+     * reference manual.
+     *
+     * @param accountsStreamSupplier {@link Stream} of {@link Account}
+     * @return {@link Collection} of {@link AccountDto}
+     * @see
+     * <a href="http://docs.spring.io/spring-data/jpa/docs/current/reference/html/#repositories.query-streaming">Streaming
+     * query results</a>
+     */
+    protected Collection<AccountDto> getAccountsDtoFrom(Stream<Account> accountsStreamSupplier) {
+        try (Stream<AccountDto> accounts = accountsStreamSupplier.parallel()
+                .map(accountModelService::toAccountDto)) {
+            return accounts.collect(Collectors.toCollection(HashSet::new));
+        }
+    }
+
+    /**
+     * Validates if dates are valid, by checking start {@link Date} is before
+     * end {@link Date}.
+     *
+     * @param start the start {@link Date}
+     * @param end the end {@link Date}
+     * @throws IllegalArgumentException if dates are invalid
+     */
+    protected void checkDates(Date start, Date end) throws IllegalArgumentException {
+        if (!start.equals(end) && start.after(end)) {
+            throw new IllegalArgumentException("Start date is after end date");
+        }
     }
 
 }

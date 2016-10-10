@@ -19,7 +19,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
-import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 /**
@@ -34,7 +34,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
  * @version 1.0
  */
 @SpringBootApplication
-@EnableCaching
+@EnableCircuitBreaker
 @EnableJpaAuditing
 public class Application extends SpringBootServletInitializer {
 

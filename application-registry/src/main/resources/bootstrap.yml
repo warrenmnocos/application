@@ -1,10 +1,10 @@
 spring:
     profiles: default
     application:
-        name: registry
+        name: application-registry
     cloud:
         config:
-            uri: http://localhost:8080
+            uri: http://172.17.0.1:8080/config
             failFast: true
             password: uiiui747h74f4e74eu45748bb44rfn7845nhd74ndeundnd63rgff6r
             username: user
@@ -13,7 +13,7 @@ spring:
 spring:
     profiles: development
     application:
-        name: registry
+        name: application-registry
 security:
     user:
         password: none
@@ -28,7 +28,7 @@ management:
 spring:
     profiles: integration
     application:
-        name: registry
+        name: application-registry
 eureka:
     instance:
         protocol: http
@@ -46,4 +46,4 @@ eureka:
 ---
 spring:
     profiles:
-        active: development, integration
+        active: default

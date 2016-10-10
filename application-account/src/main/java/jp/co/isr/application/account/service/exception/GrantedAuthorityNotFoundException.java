@@ -15,18 +15,17 @@
  */
 package jp.co.isr.application.account.service.exception;
 
-import javax.persistence.EntityNotFoundException;
 import org.springframework.security.core.GrantedAuthority;
 
 /**
- * A {@link RuntimeException} thrown when an {@link GrantedAuthority} is not
- * found in repository.
+ * An {@link Exception} thrown when an {@link GrantedAuthority} is not found in
+ * repository.
  *
  * @author Warren Nocos
  * @since 1.0
  * @version 1.0
  */
-public class GrantedAuthorityNotFoundException extends EntityNotFoundException {
+public class GrantedAuthorityNotFoundException extends RuntimeException {
 
     /**
      * Constructs a new exception with the specified detail message.

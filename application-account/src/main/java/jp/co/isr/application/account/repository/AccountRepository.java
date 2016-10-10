@@ -38,7 +38,7 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     /**
      * Deletes an {@link Account} using {@link Account#email}.
      *
-     * @param username the email
+     * @param email the email
      */
     void deleteByEmail(@Param("email") String email);
 

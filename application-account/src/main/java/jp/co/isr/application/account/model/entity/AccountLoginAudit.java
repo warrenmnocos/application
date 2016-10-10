@@ -84,6 +84,21 @@ public class AccountLoginAudit implements Comparable<AccountLoginAudit>, Seriali
     protected Date loginTime;
 
     /**
+     * This is needed for JPA
+     */
+    public AccountLoginAudit() {
+    }
+
+    /**
+     * Constructs {@link AccountLoginAudit} with {@link Account}.
+     *
+     * @param account the {@link Account}
+     */
+    public AccountLoginAudit(Account account) {
+        this.account = account;
+    }
+
+    /**
      * {@inheritDoc }
      */
     @Override
