@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.validation.constraints.NotNull;
 import jp.co.isr.application.account.model.dto.AccountDto;
 import jp.co.isr.application.account.model.dto.AccountWithUserDetailsDto;
@@ -43,6 +44,7 @@ import org.springframework.validation.annotation.Validated;
  * @version 1.0
  */
 @Service
+@Validated
 public class AccountModelServiceImpl implements AccountModelService {
 
     /**
@@ -65,7 +67,7 @@ public class AccountModelServiceImpl implements AccountModelService {
      * {@link AccountUserGrantedAuthority}
      */
     @Inject
-    public AccountModelServiceImpl(PasswordEncoder passwordEncoder,
+    public AccountModelServiceImpl(@Named("bCryptPasswordEncoder") PasswordEncoder passwordEncoder,
             AccountUserGrantedAuthorityRepository accountUserGrantedAuthorityRepository) {
         this.passwordEncoder = passwordEncoder;
         this.accountUserGrantedAuthorityRepository = accountUserGrantedAuthorityRepository;
@@ -159,29 +161,30 @@ public class AccountModelServiceImpl implements AccountModelService {
         }
     }
 
+    /**
+     * {@inheritDoc }
+     * Implementation will be provided once needed.
+     */
     @Override
-    public void copyProperties(Account account, AccountWithUserDetailsDto accountWithUserDetailsDto) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void copyProperties(AccountWithUserDetailsDto accountWithUserDetailsDto, Account account) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void copyProperties(@NotNull Account account, @NotNull AccountWithUserDetailsDto accountWithUserDetailsDto) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /**
      * {@inheritDoc }
+     * {@link Iterable} properties from {@link AccountWithUserDetailsDto} are
+     * appended to the mapped {@link Iterable} properties of the {@link Account}
+     * . Other properties are copied by value. Properties used for auditing are
+     * not processed.
      */
     @Override
-    @Validated
-    public Account toAccount(@NotNull AccountWithUserDetailsDto accountWithCredentialsDto) {
-        Account account = new Account();
-        account.setId(accountWithCredentialsDto.getId());
-        account.setEmail(accountWithCredentialsDto.getEmail());
-        account.setFirstName(accountWithCredentialsDto.getFirstName());
-        account.setMiddleName(accountWithCredentialsDto.getMiddleName());
-        account.setLastName(accountWithCredentialsDto.getLastName());
-        account.setAddresses(accountWithCredentialsDto.getAddresses().entrySet()
+    public void copyProperties(@NotNull AccountWithUserDetailsDto accountWithUserDetailsDto, @NotNull Account account) {
+        account.setId(accountWithUserDetailsDto.getId());
+        account.setEmail(accountWithUserDetailsDto.getEmail());
+        account.setFirstName(accountWithUserDetailsDto.getFirstName());
+        account.setMiddleName(accountWithUserDetailsDto.getMiddleName());
+        account.setLastName(accountWithUserDetailsDto.getLastName());
+        account.setAddresses(accountWithUserDetailsDto.getAddresses().entrySet()
                 .parallelStream()
                 .reduce(new HashMap<>(),
                         (map, entry) -> {
@@ -192,7 +195,49 @@ public class AccountModelServiceImpl implements AccountModelService {
                             previousMap.putAll(currentMap);
                             return previousMap;
                         }));
-        account.setContacts(accountWithCredentialsDto.getContacts());
+        account.setContacts(accountWithUserDetailsDto.getContacts());
+    }
+
+    /**
+     * {@inheritDoc }
+     * Implementation will be provided once needed.
+     */
+    @Override
+    public void copyProperties(@NotNull AccountUserDetails accountUserDetails, @NotNull AccountWithUserDetailsDto accountWithUserDetailsDto) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    /**
+     * {@inheritDoc }
+     * {@link Iterable} properties from {@link AccountWithUserDetailsDto} are
+     * appended to the mapped {@link Iterable} properties of the
+     * {@link AccountUserDetails} . Other properties are copied by value.
+     * Properties used for auditing are not processed.
+     */
+    @Override
+    public void copyProperties(@NotNull AccountWithUserDetailsDto accountWithUserDetailsDto, @NotNull AccountUserDetails accountUserDetails) {
+        accountUserDetails.setId(accountWithUserDetailsDto.getId());
+        accountUserDetails.setAccountNonExpired(accountWithUserDetailsDto.isAccountNonExpired());
+        accountUserDetails.setAccountNonLocked(accountWithUserDetailsDto.isAccountNonLocked());
+        accountUserDetails.setCredentialsNonExpired(accountWithUserDetailsDto.isCredentialsNonExpired());
+        accountUserDetails.setEnabled(accountWithUserDetailsDto.isEnabled());
+        accountUserDetails.setPassword(passwordEncoder.encode(accountWithUserDetailsDto.getPassword()));
+        accountUserDetails.setUsername(accountWithUserDetailsDto.getEmail());
+        accountUserDetails.setGrantedAuthorities(accountWithUserDetailsDto.getGrantedAuthorities().stream()
+                .filter(Objects::nonNull)
+                .map(accountUserGrantedAuthorityRepository::findByAuthority)
+                .map(grantedAuthority -> grantedAuthority.orElseThrow(() -> new GrantedAuthorityNotFoundException("GrantedAuthority not found")))
+                .collect(Collectors.toSet()));
+    }
+
+    /**
+     * {@inheritDoc }
+     */
+    @Override
+    @Validated
+    public Account toAccount(@NotNull AccountWithUserDetailsDto accountWithCredentialsDto) {
+        Account account = new Account();
+        copyProperties(accountWithCredentialsDto, account);
         return account;
     }
 
@@ -203,23 +248,7 @@ public class AccountModelServiceImpl implements AccountModelService {
     @Validated
     public AccountDto toAccountDto(@NotNull Account account) {
         AccountDto accountDto = new AccountDto();
-        accountDto.setId(account.getId());
-        accountDto.setEmail(account.getEmail());
-        accountDto.setFirstName(account.getFirstName());
-        accountDto.setMiddleName(account.getMiddleName());
-        accountDto.setLastName(account.getLastName());
-        accountDto.setAddresses(account.getAddresses().entrySet()
-                .parallelStream()
-                .reduce(new HashMap<>(),
-                        (map, entry) -> {
-                            map.put(entry.getKey(), toAddressDto(entry.getValue()));
-                            return map;
-                        },
-                        (previousMap, currentMap) -> {
-                            previousMap.putAll(currentMap);
-                            return previousMap;
-                        }));
-        accountDto.setContacts(account.getContacts());
+        copyProperties(account, accountDto);
         return accountDto;
     }
 
@@ -230,23 +259,7 @@ public class AccountModelServiceImpl implements AccountModelService {
     @Validated
     public Account toAccount(@NotNull AccountDto accountDto) {
         Account account = new Account();
-        account.setId(accountDto.getId());
-        account.setEmail(accountDto.getEmail());
-        account.setFirstName(accountDto.getFirstName());
-        account.setMiddleName(accountDto.getMiddleName());
-        account.setLastName(accountDto.getLastName());
-        account.setAddresses(accountDto.getAddresses().entrySet()
-                .parallelStream()
-                .reduce(new HashMap<>(),
-                        (map, entry) -> {
-                            map.put(entry.getKey(), toAddress(entry.getValue()));
-                            return map;
-                        },
-                        (previousMap, currentMap) -> {
-                            previousMap.putAll(currentMap);
-                            return previousMap;
-                        }));
-        account.setContacts(accountDto.getContacts());
+        copyProperties(accountDto, account);
         return account;
     }
 
@@ -257,18 +270,7 @@ public class AccountModelServiceImpl implements AccountModelService {
     @Validated
     public AccountUserDetails toAccountUserDetails(@NotNull AccountWithUserDetailsDto accountWithCredentialsDto) {
         AccountUserDetails accountUserDetails = new AccountUserDetails();
-        accountUserDetails.setId(accountWithCredentialsDto.getId());
-        accountUserDetails.setAccountNonExpired(accountWithCredentialsDto.isAccountNonExpired());
-        accountUserDetails.setAccountNonLocked(accountWithCredentialsDto.isAccountNonLocked());
-        accountUserDetails.setCredentialsNonExpired(accountWithCredentialsDto.isCredentialsNonExpired());
-        accountUserDetails.setEnabled(accountWithCredentialsDto.isEnabled());
-        accountUserDetails.setPassword(passwordEncoder.encode(accountWithCredentialsDto.getPassword()));
-        accountUserDetails.setUsername(accountWithCredentialsDto.getEmail());
-        accountUserDetails.setGrantedAuthorities(accountWithCredentialsDto.getGrantedAuthorities().stream()
-                .filter(Objects::nonNull)
-                .map(accountUserGrantedAuthorityRepository::findByAuthority)
-                .map(grantedAuthority -> grantedAuthority.orElseThrow(() -> new GrantedAuthorityNotFoundException("GrantedAuthority not found")))
-                .collect(Collectors.toSet()));
+        copyProperties(accountWithCredentialsDto, accountUserDetails);
         return accountUserDetails;
     }
 

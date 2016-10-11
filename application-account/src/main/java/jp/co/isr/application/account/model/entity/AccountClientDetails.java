@@ -96,8 +96,7 @@ public class AccountClientDetails
                     nullable = false,
                     referencedColumnName = "id"),
             name = "account_client_details_scope")
-    @Column(length = 1024,
-            name = "scope",
+    @Column(name = "scope",
             nullable = false)
     @NotNull
     protected Set<String> scope;
@@ -109,8 +108,7 @@ public class AccountClientDetails
                     nullable = false,
                     referencedColumnName = "id"),
             name = "account_client_details_resource_id")
-    @Column(length = 1024,
-            name = "resource_id",
+    @Column(name = "resource_id",
             nullable = false)
     @NotNull
     protected Set<String> resourceIds;
@@ -122,8 +120,7 @@ public class AccountClientDetails
                     nullable = false,
                     referencedColumnName = "id"),
             name = "account_client_details_authorized_grant_type")
-    @Column(length = 1024,
-            name = "authorized_grant_type",
+    @Column(name = "authorized_grant_type",
             nullable = false)
     @NotNull
     protected Set<String> authorizedGrantTypes;
@@ -135,8 +132,7 @@ public class AccountClientDetails
                     nullable = false,
                     referencedColumnName = "id"),
             name = "account_client_details_registered_redirect_uri")
-    @Column(length = 1024,
-            name = "registered_redirect_uri",
+    @Column(name = "registered_redirect_uri",
             nullable = false)
     @NotNull
     protected Set<String> registeredRedirectUri;
@@ -148,8 +144,7 @@ public class AccountClientDetails
                     nullable = false,
                     referencedColumnName = "id"),
             name = "account_client_details_auto_approve_scope")
-    @Column(length = 1024,
-            name = "auto_approve_scope",
+    @Column(name = "auto_approve_scope",
             nullable = false)
     @NotNull
     protected Set<String> autoApproveScopes;

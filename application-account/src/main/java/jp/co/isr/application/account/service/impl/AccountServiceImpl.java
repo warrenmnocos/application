@@ -44,6 +44,7 @@ import org.springframework.validation.annotation.Validated;
  * @version 1.0
  */
 @Service
+@Validated
 @RolesAllowed("ADMIN")
 @Transactional(readOnly = true)
 public class AccountServiceImpl implements AccountService {
@@ -81,27 +82,6 @@ public class AccountServiceImpl implements AccountService {
         this.accountRepository = accountRepository;
         this.accountUserDetailsRepository = accountUserDetailsRepository;
         this.accountDtoAccountConverterService = accountDtoAccountConverterService;
-    }
-
-    /**
-     * {@inheritDoc }
-     */
-    @Override
-    @Transactional
-    public void deleteAccountById(long id) {
-        getCurrentAccount();
-        accountRepository.delete(id);
-    }
-
-    /**
-     * {@inheritDoc }
-     */
-    @Override
-    @Validated
-    @Transactional
-    public void deleteAccountByEmail(@NotNull String email) {
-        getCurrentAccount();
-        accountRepository.deleteByEmail(email);
     }
 
     /**
@@ -175,7 +155,6 @@ public class AccountServiceImpl implements AccountService {
     @Validated
     @Transactional
     public void saveAccount(@NotNull AccountWithUserDetailsDto accountWithCredentialsDto) {
-        getCurrentAccount();
         accountRepository.save(accountDtoAccountConverterService.toAccount(accountWithCredentialsDto));
         accountUserDetailsRepository.save(accountDtoAccountConverterService.toAccountUserDetails(accountWithCredentialsDto));
     }
@@ -187,11 +166,15 @@ public class AccountServiceImpl implements AccountService {
     @Validated
     @Transactional
     public void updateAccount(@NotNull AccountWithUserDetailsDto accountWithCredentialsDto) {
-        getCurrentAccount();
         accountRepository.findById(accountWithCredentialsDto.getId())
                 .ifPresent(account -> {
-                    // TODO
+                    accountDtoAccountConverterService.copyProperties(accountWithCredentialsDto, account);
                     accountRepository.save(account);
+                    accountUserDetailsRepository.findByUsername(account.getEmail())
+                            .ifPresent(accountUserDetails -> {
+                                accountDtoAccountConverterService.copyProperties(accountWithCredentialsDto, accountUserDetails);
+                                accountUserDetailsRepository.save(accountUserDetails);
+                            });
                 });
     }
 

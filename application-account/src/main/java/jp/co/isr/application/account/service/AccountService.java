@@ -17,6 +17,7 @@ package jp.co.isr.application.account.service;
 
 import java.security.Principal;
 import java.util.Set;
+import javax.validation.constraints.NotNull;
 import jp.co.isr.application.account.model.dto.AccountDto;
 import jp.co.isr.application.account.model.dto.AccountWithUserDetailsDto;
 import jp.co.isr.application.account.model.entity.Account;
@@ -30,20 +31,6 @@ import jp.co.isr.application.account.model.entity.AccountUserDetails;
  * @version 1.0
  */
 public interface AccountService {
-
-    /**
-     * Deletes an {@link Account} using the unique identifier specified.
-     *
-     * @param id the unique identifier of {@link Account}
-     */
-    void deleteAccountById(long id);
-
-    /**
-     * Deletes an {@link Account} using the email specified.
-     *
-     * @param email the email of an {@link Account}, must not be {@code null}
-     */
-    void deleteAccountByEmail(String email);
 
     /**
      * Retrieves all accounts. This is not efficient if plenty of
@@ -61,7 +48,7 @@ public interface AccountService {
      * @param pageSize the page size, must not be {@code null}
      * @return {@link Set} of accounts
      */
-    Set<AccountDto> findAllAccounts(Integer page, Integer pageSize);
+    Set<AccountDto> findAllAccounts(@NotNull Integer page, @NotNull Integer pageSize);
 
     /**
      * Retrieves an {@link Account} with the specified unique identifier.
@@ -77,7 +64,7 @@ public interface AccountService {
      * @param email the email of {@link Account}
      * @return the {@link Account}, must not be {@code null}
      */
-    AccountDto findAccountByEmail(String email);
+    AccountDto findAccountByEmail(@NotNull String email);
 
     /**
      * Retrieves the currently authenticated {@link Account}.
@@ -94,7 +81,7 @@ public interface AccountService {
      * which is converted to {@link Account} and {@link AccountUserDetails}, to
      * be persisted, and must not be {@code null}
      */
-    void saveAccount(AccountWithUserDetailsDto accountWithCredentialsDto);
+    void saveAccount(@NotNull AccountWithUserDetailsDto accountWithCredentialsDto);
 
     /**
      * Updates an {@link Account} to the repository.
@@ -103,6 +90,6 @@ public interface AccountService {
      * which is converted to {@link Account} and {@link AccountUserDetails}, to
      * be updated, and must not be {@code null}
      */
-    void updateAccount(AccountWithUserDetailsDto accountWithCredentialsDto);
+    void updateAccount(@NotNull AccountWithUserDetailsDto accountWithCredentialsDto);
 
 }

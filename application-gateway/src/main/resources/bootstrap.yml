@@ -43,4 +43,4 @@ eureka:
 ---
 spring:
     profiles:
-        active: default
+        active: production, installation

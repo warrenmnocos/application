@@ -1,5 +1,5 @@
 spring:
-    profiles: default
+    profiles: production
     application:
         name: application-registry
     cloud:
@@ -29,6 +29,12 @@ spring:
     profiles: integration
     application:
         name: application-registry
+    cloud:
+        config:
+            uri: http://localhost:8080/config
+            failFast: true
+            password: uiiui747h74f4e74eu45748bb44rfn7845nhd74ndeundnd63rgff6r
+            username: user
 eureka:
     instance:
         protocol: http
@@ -46,4 +52,4 @@ eureka:
 ---
 spring:
     profiles:
-        active: default
+        active: production

@@ -15,6 +15,7 @@
  */
 package jp.co.isr.application.account.service;
 
+import javax.validation.constraints.NotNull;
 import jp.co.isr.application.account.model.dto.AccountDto;
 import jp.co.isr.application.account.model.dto.AccountWithUserDetailsDto;
 import jp.co.isr.application.account.model.dto.AddressDto;
@@ -39,7 +40,7 @@ public interface AccountModelService {
      * @param account the {@link Account}
      * @param accountDto the {@link AccountDto}
      */
-    void copyProperties(Account account, AccountDto accountDto);
+    void copyProperties(@NotNull Account account, @NotNull AccountDto accountDto);
 
     /**
      * Copies property values of {@link AccountDto} to {@link Account}. Specific
@@ -49,7 +50,7 @@ public interface AccountModelService {
      * @param accountDto the {@link AccountDto}
      * @param account the {@link Account}
      */
-    void copyProperties(AccountDto accountDto, Account account);
+    void copyProperties(@NotNull AccountDto accountDto, @NotNull Account account);
 
     /**
      * Copies property values of {@link Account} to
@@ -60,7 +61,7 @@ public interface AccountModelService {
      * @param account the {@link Account}
      * @param accountWithUserDetailsDto the {@link AccountWithUserDetailsDto}
      */
-    void copyProperties(Account account, AccountWithUserDetailsDto accountWithUserDetailsDto);
+    void copyProperties(@NotNull Account account, @NotNull AccountWithUserDetailsDto accountWithUserDetailsDto);
 
     /**
      * Copies property values of {@link AccountWithUserDetailsDto} to
@@ -71,7 +72,29 @@ public interface AccountModelService {
      * @param accountWithUserDetailsDto the {@link AccountWithUserDetailsDto}
      * @param account the {@link Account}
      */
-    void copyProperties(AccountWithUserDetailsDto accountWithUserDetailsDto, Account account);
+    void copyProperties(@NotNull AccountWithUserDetailsDto accountWithUserDetailsDto, @NotNull Account account);
+    
+    /**
+     * Copies property values of {@link AccountUserDetails} to
+     * {@link AccountWithUserDetailsDto}. Specific considerations like handling
+     * of {@link Iterable} properties must be catered and documented on the
+     * implementations.
+     *
+     * @param accountUserDetails the {@link AccountUserDetails}
+     * @param accountWithUserDetailsDto the {@link AccountWithUserDetailsDto}
+     */
+    void copyProperties(@NotNull AccountUserDetails accountUserDetails, @NotNull AccountWithUserDetailsDto accountWithUserDetailsDto);
+
+    /**
+     * Copies property values of {@link AccountWithUserDetailsDto} to
+     * {@link AccountUserDetails}. Specific considerations like handling of
+     * {@link Iterable} properties must be catered and documented on the
+     * implementations.
+     *
+     * @param accountWithUserDetailsDto the {@link AccountWithUserDetailsDto}
+     * @param accountUserDetails the {@link AccountUserDetails}
+     */
+    void copyProperties(@NotNull AccountWithUserDetailsDto accountWithUserDetailsDto, @NotNull AccountUserDetails accountUserDetails);
 
     /**
      * Converts an {@link Account} to {@Link AccountDto}.
@@ -79,7 +102,7 @@ public interface AccountModelService {
      * @param account the {@link Account} to be converted
      * @return the {@Link AccountDto}
      */
-    AccountDto toAccountDto(Account account);
+    AccountDto toAccountDto(@NotNull Account account);
 
     /**
      * Converts an {@link AccountWithUserDetailsDto} to {@Link Account}.
@@ -87,7 +110,7 @@ public interface AccountModelService {
      * @param accountWithCredentialsDto the {@link AccountDto} to be converted
      * @return the {@Link Account}
      */
-    Account toAccount(AccountWithUserDetailsDto accountWithCredentialsDto);
+    Account toAccount(@NotNull AccountWithUserDetailsDto accountWithCredentialsDto);
 
     /**
      * Converts an {@link AccountDto} to {@Link Account}.
@@ -95,7 +118,7 @@ public interface AccountModelService {
      * @param accountDto the {@link AccountDto} to be converted
      * @return the {@Link Account}
      */
-    Account toAccount(AccountDto accountDto);
+    Account toAccount(@NotNull AccountDto accountDto);
 
     /**
      * Converts an {@link AccountWithUserDetailsDto} to
@@ -104,7 +127,7 @@ public interface AccountModelService {
      * @param accountWithCredentialsDto the {@link AccountDto} to be converted
      * @return the {@Link AccountUserDetails}
      */
-    AccountUserDetails toAccountUserDetails(AccountWithUserDetailsDto accountWithCredentialsDto);
+    AccountUserDetails toAccountUserDetails(@NotNull AccountWithUserDetailsDto accountWithCredentialsDto);
 
     /**
      * Converts an {@link Address} to {@Link AddressDto}.
@@ -112,7 +135,7 @@ public interface AccountModelService {
      * @param address the {@link Address} to be converted
      * @return the {@Link AddressDto}
      */
-    AddressDto toAddressDto(Address address);
+    AddressDto toAddressDto(@NotNull Address address);
 
     /**
      * Converts an {@link AddressDto} to {@Link Address}.
@@ -120,6 +143,6 @@ public interface AccountModelService {
      * @param addressDto the {@link AddressDto} to be converted
      * @return the {@Link Address}
      */
-    Address toAddress(AddressDto addressDto);
+    Address toAddress(@NotNull AddressDto addressDto);
 
 }

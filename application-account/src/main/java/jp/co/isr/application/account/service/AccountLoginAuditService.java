@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import javax.validation.constraints.NotNull;
 import jp.co.isr.application.account.model.dto.AccountDto;
 import jp.co.isr.application.account.model.entity.Account;
 import jp.co.isr.application.account.model.entity.AccountLoginAudit;
@@ -43,7 +44,7 @@ public interface AccountLoginAuditService {
      * @throws AccountNotFoundException if no {@link Account} is found basing
      * specified {@link AccountDto}
      */
-    void audit(AccountDto accountDto) throws AccountNotFoundException;
+    void audit(@NotNull AccountDto accountDto) throws AccountNotFoundException;
 
     /**
      * Retrieves all unique dates where there were {@link AccountUserDetails}
@@ -66,7 +67,7 @@ public interface AccountLoginAuditService {
      * @return {@link Collection} of {@link LocalDate} of all the unique dates
      * in pagination
      */
-    Collection<LocalDate> findDatesWithLoginActivityAscendingly(Integer page, Integer pageSize);
+    Collection<LocalDate> findDatesWithLoginActivityAscendingly(@NotNull Integer page, @NotNull Integer pageSize);
 
     /**
      * Retrieves all {@link AccountDto} with login activity. Results may be
@@ -97,7 +98,7 @@ public interface AccountLoginAuditService {
      * @return {@link Collection} of {@link AccountDto}
      */
     Collection<AccountDto> findAccountsWithLoginActivityAscendingly(Optional<LocalDate> start,
-            Optional<LocalDate> end, Integer page, Integer pageSize);
+            Optional<LocalDate> end, @NotNull Integer page, @NotNull Integer pageSize);
 
     /**
      * Retrieves accounts with login records. Results can be filtered using
@@ -140,6 +141,6 @@ public interface AccountLoginAuditService {
     Map<String, Long> findFilteredAccountsWithLoginAudit(Optional<LocalDate> start,
             Optional<LocalDate> end, Collection<String> emails, Collection<String> firstNames,
             Collection<String> middleNames, Collection<String> lastNames,
-            Integer page, Integer pageSize);
+            @NotNull Integer page, @NotNull Integer pageSize);
 
 }

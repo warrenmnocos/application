@@ -17,12 +17,10 @@ package jp.co.isr.application.account;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -37,29 +35,28 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
  */
 @Configuration
 @EnableWebSecurity
-@EnableResourceServer
-@EnableAuthorizationServer
 @EnableGlobalMethodSecurity(jsr250Enabled = true)
-public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
-
-    protected final UserDetailsService userDetailsService;
+@EnableAuthorizationServer
+@EnableResourceServer
+public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     protected final PasswordEncoder passwordEncoder;
 
-    public WebSecurityConfiguration(UserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
-        this.passwordEncoder = new BCryptPasswordEncoder();
+    public SecurityConfiguration() {
+        passwordEncoder = new BCryptPasswordEncoder();
     }
 
-    @Bean
-    @Primary
+    @Bean("bCryptPasswordEncoder")
     public PasswordEncoder getPasswordEncoder() {
         return passwordEncoder;
     }
 
     @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
+    public void configure(HttpSecurity http) throws Exception {
+        http.csrf().disable()
+                .authorizeRequests()
+                .antMatchers("/admin").hasAnyRole("ADMIN")
+                .anyRequest().authenticated();
     }
 
 }

@@ -42,21 +42,80 @@ import org.springframework.stereotype.Repository;
 public interface AccountLoginAuditRepository
         extends JpaRepository<AccountLoginAudit, Long>, JpaSpecificationExecutor<AccountLoginAudit> {
 
-    @Query("SELECT DISTINCT a.loginTime FROM AccountLoginAudit a ORDER BY a.loginTime ASC")
+    /**
+     * This retrieves all unique dates.
+     * <br>
+     * <br>
+     * <b>Compatibility Note:</b>
+     * <br>
+     * This query is not a valid JPQL query based on standards as of JPA 2.1.
+     * This query is tested on Hibernate. This query should be tested if there's
+     * an intent to use other JPA providers aside from Hibernate.
+     *
+     * @param pageable the {@link Pageable}
+     * @return the {@link Stream} of {@link Date}
+     */
+    @Query("SELECT DISTINCT CAST(a.loginTime AS date) FROM AccountLoginAudit a ORDER BY a.loginTime ASC")
     Stream<Date> findAllLoginDate(Pageable pageable);
 
+    /**
+     * Retrieves all {@link Account} with {@link AccountLoginAudit}.
+     *
+     * @param pageable the {@link Pageable}
+     * @return the {@link Stream} of {@link Account}
+     */
     @Query("SELECT DISTINCT a.account FROM AccountLoginAudit a ORDER BY a.account.email")
     Stream<Account> findAccountsWithLoginAudit(Pageable pageable);
 
+    /**
+     * Retrieves all {@link Account} with {@link AccountLoginAudit} from
+     * {@code start} and before {@code end}.
+     *
+     * @param start the start {@link Date}
+     * @param end the end {@link Date}
+     * @param pageable the {@link Pageable}
+     * @return the {@link Stream} of {@link Account}
+     */
     @Query("SELECT DISTINCT a.account FROM AccountLoginAudit a WHERE a.loginTime >= :start AND a.loginTime <= :end ORDER BY a.account.email")
     Stream<Account> findAccountsBetweenLoginTimeInclusive(@Param("start") Date start, @Param("end") Date end, Pageable pageable);
 
+    /**
+     * Retrieves all {@link Account} with {@link AccountLoginAudit} from
+     * {@code start}.
+     *
+     * @param start the start {@link Date}
+     * @param pageable the {@link Pageable}
+     * @return the {@link Stream} of {@link Account}
+     */
     @Query("SELECT DISTINCT a.account FROM AccountLoginAudit a WHERE a.loginTime >= :start ORDER BY a.account.email")
     Stream<Account> findAccountsAfterLoginTimeInclusive(@Param("start") Date start, Pageable pageable);
 
+    /**
+     * Retrieves all {@link Account} with {@link AccountLoginAudit} before
+     * {@code end}.
+     *
+     * @param end the end {@link Date}
+     * @param pageable the {@link Pageable}
+     * @return the {@link Stream} of {@link Account}
+     */
     @Query("SELECT DISTINCT a.account FROM AccountLoginAudit a WHERE a.loginTime <= :end ORDER BY a.account.email")
     Stream<Account> findAccountsBeforeLoginTimeInclusive(@Param("end") Date end, Pageable pageable);
 
+    /**
+     * Retrieves all {@link AccountLoginAudit} based on specified filters.
+     *
+     * @param start the start {@link Date}
+     * @param end the end {@link Date}
+     * @param emails the {@code emails}, mapped to {@link Account#email}
+     * @param firstNames the {@code firstNames}, mapped to
+     * {@link Account#firstName}
+     * @param middleNames the {@code middleNames}, mapped to
+     * {@link Account#middleName}
+     * @param lastNames the {@code lastNames}, mapped to
+     * {@link Account#lastName}
+     * @param pageable the {@link Pageable}
+     * @return the {@link List} of {@link Account}
+     */
     default List<AccountLoginAudit> findByFilters(Date start, Date end,
             Collection<String> emails, Collection<String> firstNames,
             Collection<String> middleNames, Collection<String> lastNames, Pageable pageable) {

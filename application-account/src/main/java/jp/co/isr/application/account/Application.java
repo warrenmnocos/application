@@ -19,8 +19,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
-import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 /**
  * This is the starter for this microservice. Extending
@@ -34,7 +35,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
  * @version 1.0
  */
 @SpringBootApplication
-@EnableCircuitBreaker
 @EnableJpaAuditing
 public class Application extends SpringBootServletInitializer {
 
@@ -44,6 +44,16 @@ public class Application extends SpringBootServletInitializer {
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
         return builder.sources(Application.class);
+    }
+
+    /**
+     * This is used for method level validation.
+     *
+     * @return the {@link MethodValidationPostProcessor}
+     */
+    @Bean
+    public MethodValidationPostProcessor methodValidationPostProcessor() {
+        return new MethodValidationPostProcessor();
     }
 
     /**

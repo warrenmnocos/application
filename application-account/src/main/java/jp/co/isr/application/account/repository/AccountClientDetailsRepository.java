@@ -17,7 +17,7 @@ package jp.co.isr.application.account.repository;
 
 import java.util.Optional;
 import jp.co.isr.application.account.model.entity.AccountClientDetails;
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -31,7 +31,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface AccountClientDetailsRepository
-        extends PagingAndSortingRepository<AccountClientDetails, Long> {
+        extends JpaRepository<AccountClientDetails, Long> {
 
     /**
      * This queries for {@link AccountClientDetails} using

@@ -40,7 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @version 1.0
  */
 @RestController
-@RequestMapping(path = "/api/rest/account",
+@RequestMapping(path = "/api/rest/account/access",
         produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 public class AccountLoginAuditServiceRestEndpoint implements AccountLoginAuditService {
 
@@ -83,7 +83,7 @@ public class AccountLoginAuditServiceRestEndpoint implements AccountLoginAuditSe
      * {@inheritDoc }
      */
     @Override
-    @GetMapping(params = {"start", "end",}, path = "/users")
+    @GetMapping("/users")
     public Collection<AccountDto> findAccountsWithLoginActivityAscendingly(
             @DateTimeFormat(pattern = "yyyyMMdd") @RequestParam("start") Optional<LocalDate> start,
             @DateTimeFormat(pattern = "yyyyMMdd") @RequestParam("end") Optional<LocalDate> end) {
@@ -94,7 +94,7 @@ public class AccountLoginAuditServiceRestEndpoint implements AccountLoginAuditSe
      * {@inheritDoc }
      */
     @Override
-    @GetMapping(params = {"start", "end", "page", "size"}, path = "/users")
+    @GetMapping(params = {"page", "size"}, path = "/users")
     public Collection<AccountDto> findAccountsWithLoginActivityAscendingly(
             @DateTimeFormat(pattern = "yyyyMMdd") @RequestParam("start") Optional<LocalDate> start,
             @DateTimeFormat(pattern = "yyyyMMdd") @RequestParam("end") Optional<LocalDate> end,
@@ -106,12 +106,14 @@ public class AccountLoginAuditServiceRestEndpoint implements AccountLoginAuditSe
      * {@inheritDoc }
      */
     @Override
-    @GetMapping(params = {"start", "end", "email", "firstName", "middleName", "lastName"}, path = "/logins")
+    @GetMapping("/logins")
     public Map<String, Long> findFilteredAccountsWithLoginAudit(
             @DateTimeFormat(pattern = "yyyyMMdd") @RequestParam("start") Optional<LocalDate> start,
             @DateTimeFormat(pattern = "yyyyMMdd") @RequestParam("end") Optional<LocalDate> end,
-            @RequestParam("email") Collection<String> emails, @RequestParam("firstName") Collection<String> firstNames,
-            @RequestParam("middleName") Collection<String> middleNames, @RequestParam("lastName") Collection<String> lastNames) {
+            @RequestParam(name = "email", required = false) Collection<String> emails,
+            @RequestParam(name = "firstName", required = false) Collection<String> firstNames,
+            @RequestParam(name = "middleName", required = false) Collection<String> middleNames,
+            @RequestParam(name = "lastName", required = false) Collection<String> lastNames) {
         return accountLoginAuditService.findFilteredAccountsWithLoginAudit(start, end, emails, firstNames, middleNames, lastNames);
     }
 
@@ -119,13 +121,14 @@ public class AccountLoginAuditServiceRestEndpoint implements AccountLoginAuditSe
      * {@inheritDoc }
      */
     @Override
-    @GetMapping(params = {"start", "end", "email", "firstName", "middleName",
-        "lastName", "page", "size"}, path = "/logins")
+    @GetMapping(params = {"page", "size"}, path = "/logins")
     public Map<String, Long> findFilteredAccountsWithLoginAudit(
             @DateTimeFormat(pattern = "yyyyMMdd") @RequestParam("start") Optional<LocalDate> start,
             @DateTimeFormat(pattern = "yyyyMMdd") @RequestParam("end") Optional<LocalDate> end,
-            @RequestParam("email") Collection<String> emails, @RequestParam("firstName") Collection<String> firstNames,
-            @RequestParam("middleName") Collection<String> middleNames, @RequestParam("lastName") Collection<String> lastNames,
+            @RequestParam(name = "email", required = false) Collection<String> emails,
+            @RequestParam(name = "firstName", required = false) Collection<String> firstNames,
+            @RequestParam(name = "middleName", required = false) Collection<String> middleNames,
+            @RequestParam(name = "lastName", required = false) Collection<String> lastNames,
             @RequestParam("page") Integer page, @RequestParam("size") Integer pageSize) {
         return accountLoginAuditService.findFilteredAccountsWithLoginAudit(start, end, emails, firstNames, middleNames, lastNames, page, pageSize);
     }

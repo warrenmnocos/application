@@ -33,7 +33,8 @@ import org.springframework.stereotype.Repository;
  * @version 1.0
  */
 @Repository
-public interface AccountRepository extends JpaRepository<Account, Long> {
+public interface AccountRepository
+        extends JpaRepository<Account, Long> {
 
     /**
      * Deletes an {@link Account} using {@link Account#email}.

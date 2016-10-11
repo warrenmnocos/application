@@ -16,14 +16,14 @@
 package jp.co.isr.application.account.service.impl;
 
 import javax.inject.Inject;
-import javax.inject.Named;
-import jp.co.isr.application.account.model.dto.AccountDto;
-import jp.co.isr.application.account.service.AccountLoginAuditService;
-import jp.co.isr.application.account.service.AccountService;
+import jp.co.isr.application.account.model.entity.AccountLoginAudit;
+import jp.co.isr.application.account.repository.AccountLoginAuditRepository;
+import jp.co.isr.application.account.repository.AccountRepository;
 import org.springframework.context.ApplicationListener;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * This a service, implementing {@link ApplicationListener}, which handles
@@ -38,28 +38,31 @@ import org.springframework.stereotype.Service;
 public class AuthenticationSuccessAuditingListenerService
         implements ApplicationListener<AuthenticationSuccessEvent> {
 
-    protected final AccountService accountService;
+    protected final AccountRepository accountRepository;
 
-    protected final AccountLoginAuditService accountLoginAuditService;
+    protected final AccountLoginAuditRepository accountLoginAuditRepository;
 
     @Inject
-    public AuthenticationSuccessAuditingListenerService(
-            @Named("accountServiceImpl") AccountService accountService,
-            @Named("accountLoginAuditServiceImpl") AccountLoginAuditService accountLoginAuditService) {
-        this.accountService = accountService;
-        this.accountLoginAuditService = accountLoginAuditService;
+    public AuthenticationSuccessAuditingListenerService(AccountRepository accountRepository,
+            AccountLoginAuditRepository accountLoginAuditRepository) {
+        this.accountRepository = accountRepository;
+        this.accountLoginAuditRepository = accountLoginAuditRepository;
     }
 
     /**
      * {@inheritDoc }
+     * This listener audits every successful login.
      */
     @Override
+    @Transactional
     public void onApplicationEvent(AuthenticationSuccessEvent event) {
         Object principal = event.getAuthentication().getPrincipal();
-        if (principal != null && principal instanceof UserDetails) {
+        if (principal != null && principal instanceof UserDetails
+                && event.getAuthentication().isAuthenticated()) {
             UserDetails userDetails = (UserDetails) principal;
-            AccountDto accountDto = accountService.findAccountByEmail(userDetails.getUsername());
-            accountLoginAuditService.audit(accountDto);
+            accountRepository.findByEmail(userDetails.getUsername())
+                    .map(AccountLoginAudit::new)
+                    .ifPresent(accountLoginAuditRepository::save);
         }
     }
 

@@ -22,7 +22,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Past;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Objects;
@@ -127,7 +126,6 @@ public class AccountUserDetails implements Comparable<AccountUserDetails>, UserD
             name = "creation_date")
     @Temporal(TemporalType.TIMESTAMP)
     @NotNull
-    @Past
     protected Date createdDate;
 
     @LastModifiedDate
@@ -135,7 +133,6 @@ public class AccountUserDetails implements Comparable<AccountUserDetails>, UserD
             name = "last_modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     @NotNull
-    @Past
     protected Date lastModifiedDate;
 
     public AccountUserDetails() {

@@ -15,13 +15,14 @@
  */
 package jp.co.isr.application.account.service.impl;
 
+import java.time.Instant;
 import jp.co.isr.application.account.service.exception.AccountNotFoundException;
-import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
@@ -41,9 +42,6 @@ import jp.co.isr.application.account.repository.AccountRepository;
 import jp.co.isr.application.account.service.AccountLoginAuditService;
 import jp.co.isr.application.account.service.AccountModelService;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
-import org.springframework.security.authentication.event.InteractiveAuthenticationSuccessEvent;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -56,6 +54,7 @@ import org.springframework.validation.annotation.Validated;
  * @version 1.0
  */
 @Service
+@Validated
 @RolesAllowed("ADMIN")
 @Transactional(readOnly = true)
 public class AccountLoginAuditServiceImpl implements AccountLoginAuditService {
@@ -96,16 +95,11 @@ public class AccountLoginAuditServiceImpl implements AccountLoginAuditService {
 
     /**
      * {@inheritDoc }
-     * Allowable role to invoke this operation is set to 'ANONYMOUS', since
-     * auditing will happen after authentication is verified, but before
-     * {@link SecurityContext}'s {@link Principal} is created.
      *
-     * @see AuthenticationSuccessEvent
-     * @see InteractiveAuthenticationSuccessEvent
      */
     @Override
-    @Validated
-    @RolesAllowed("ANONYMOUS")
+    @Transactional
+    @RolesAllowed({"USER", "ADMIN"})
     public void audit(@NotNull AccountDto accountDto) throws AccountNotFoundException {
         Account account = accountRepository.findByEmail(accountDto.getEmail())
                 .orElseThrow(() -> new EntityNotFoundException("Account not found"));
@@ -126,13 +120,14 @@ public class AccountLoginAuditServiceImpl implements AccountLoginAuditService {
      * {@inheritDoc }
      */
     @Override
-    @Validated
     public Collection<LocalDate> findDatesWithLoginActivityAscendingly(
             @NotNull Integer page, @NotNull Integer pageSize) {
+        ZoneId defaultZoneId = ZoneId.systemDefault();
         try (Stream<LocalDate> dates = accountLoginAuditRepository.findAllLoginDate(new PageRequest(page, pageSize))
                 .parallel()
-                .map(Date::toInstant)
-                .map(LocalDate::from)
+                .map(Date::getTime)
+                .map(Instant::ofEpochMilli)
+                .map(instant -> instant.atZone(defaultZoneId).toLocalDate())
                 .distinct()) {
             return dates.collect(Collectors.toList());
         }
@@ -151,7 +146,6 @@ public class AccountLoginAuditServiceImpl implements AccountLoginAuditService {
      * {@inheritDoc }
      */
     @Override
-    @Validated
     public Collection<AccountDto> findAccountsWithLoginActivityAscendingly(Optional<LocalDate> start,
             Optional<LocalDate> end, @NotNull Integer page, @NotNull Integer pageSize) {
         if (start.isPresent() && end.isPresent()) {
@@ -186,7 +180,6 @@ public class AccountLoginAuditServiceImpl implements AccountLoginAuditService {
      * {@inheritDoc }
      */
     @Override
-    @Validated
     public Map<String, Long> findFilteredAccountsWithLoginAudit(Optional<LocalDate> start,
             Optional<LocalDate> end, Collection<String> emails, Collection<String> firstNames,
             Collection<String> middleNames, Collection<String> lastNames,
@@ -203,7 +196,10 @@ public class AccountLoginAuditServiceImpl implements AccountLoginAuditService {
             to = Date.from(ZonedDateTime.of(end.get(), LocalTime.MAX, ZoneId.systemDefault()).toInstant());
         }
         return accountLoginAuditRepository.findByFilters(from, to,
-                emails, firstNames, middleNames, lastNames,
+                emails == null ? Collections.emptyList() : emails,
+                firstNames == null ? Collections.emptyList() : firstNames,
+                middleNames == null ? Collections.emptyList() : middleNames,
+                lastNames == null ? Collections.emptyList() : lastNames,
                 new PageRequest(page, pageSize)).stream()
                 .map(AccountLoginAudit::getAccount)
                 .collect(Collectors.groupingBy(

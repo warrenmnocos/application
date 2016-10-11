@@ -21,7 +21,7 @@ import javax.inject.Named;
 import jp.co.isr.application.account.model.dto.AccountDto;
 import jp.co.isr.application.account.model.dto.AccountWithUserDetailsDto;
 import jp.co.isr.application.account.service.AccountService;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -39,7 +39,8 @@ import org.springframework.web.bind.annotation.RestController;
  * @version 1.0
  */
 @RestController
-@RequestMapping("/api/rest/account")
+@RequestMapping(path = "/api/rest/account",
+        produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 public class AccountServiceRestEndpoint implements AccountService {
 
     /**
@@ -63,24 +64,6 @@ public class AccountServiceRestEndpoint implements AccountService {
      * {@inheritDoc }
      */
     @Override
-    @DeleteMapping(params = "id")
-    public void deleteAccountById(long id) {
-        accountService.deleteAccountById(id);
-    }
-
-    /**
-     * {@inheritDoc }
-     */
-    @Override
-    @DeleteMapping(params = "email")
-    public void deleteAccountByEmail(String email) {
-        accountService.deleteAccountByEmail(email);
-    }
-
-    /**
-     * {@inheritDoc }
-     */
-    @Override
     @GetMapping
     public Set<AccountDto> findAllAccounts() {
         return accountService.findAllAccounts();
@@ -90,10 +73,10 @@ public class AccountServiceRestEndpoint implements AccountService {
      * {@inheritDoc }
      */
     @Override
-    @GetMapping(params = {"page", "pageSize"})
+    @GetMapping(params = {"page", "size"})
     public Set<AccountDto> findAllAccounts(
             @RequestParam("page") Integer page,
-            @RequestParam("pageSize") Integer pageSize) {
+            @RequestParam("size") Integer pageSize) {
         return accountService.findAllAccounts(page, pageSize);
     }
 

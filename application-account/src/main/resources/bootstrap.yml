@@ -1,10 +1,10 @@
 spring:
-    profiles: default
+    profiles: production
     application:
         name: application-account
     cloud:
         config:
-            uri: http://localhost:8080
+            uri: http://172.17.0.1:8080/config
             failFast: true
             password: uiiui747h74f4e74eu45748bb44rfn7845nhd74ndeundnd63rgff6r
             username: user
@@ -14,32 +14,26 @@ spring:
     profiles: development
     application:
         name: application-account
+    aop:
+        proxy-target-class: true
     jpa:
         show-sql: true
-        database: h2
         generate-ddl: true
-        database-platform: H2
+        database: h2
         hibernate:
             use-new-id-generator-mappings: true
     datasource:
         hikari:
-            maximum-pool-size: 20
+            maximum-pool-size: 50
             pool-name: datasource-development
         type: com.zaxxer.hikari.HikariDataSource
-    cache:
-        jcache:
-            provider: org.ehcache.jsr107.EhcacheCachingProvider
-        cache-names: account
-        type: jcache
 security:
     user:
         password: none
     oauth2:
-        sso:
-            protocol: http
-            address: localhost
-            port: 80
-            context-path: /security
+        authorization:
+            check-token-access: isAuthenticated()
+            token-key-access: permitAll()
         client:
             client-id: none
             client-secret: none
@@ -55,6 +49,14 @@ spring:
     profiles: integration
     application:
         name: application-account
+    aop:
+        proxy-target-class: true
+    cloud:
+        config:
+            uri: http://localhost:8080/config
+            failFast: true
+            password: uiiui747h74f4e74eu45748bb44rfn7845nhd74ndeundnd63rgff6r
+            username: user
 eureka:
     instance:
         protocol: http
@@ -69,4 +71,4 @@ eureka:
 ---
 spring:
     profiles:
-        active: development, integration
+        active: production

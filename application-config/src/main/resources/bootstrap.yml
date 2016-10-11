@@ -1,7 +1,7 @@
 spring:
-    profiles: default
+    profiles: production
     application:
-        name: config
+        name: application-config
     cloud:
         config:
             server:
@@ -23,7 +23,12 @@ management:
 spring:
     profiles: development
     application:
-        name: config
+        name: application-config
+    cloud:
+        config:
+            server:
+                git:
+                    uri: https://github.com/warrenmnocos/application-config
 security:
     user:
         password: uiiui747h74f4e74eu45748bb44rfn7845nhd74ndeundnd63rgff6r
@@ -40,7 +45,7 @@ management:
 spring:
     profiles: integration
     application:
-        name: config
+        name: application-config
 eureka:
     instance:
         protocol: http
@@ -58,4 +63,4 @@ eureka:
 ---
 spring:
     profiles:
-        active: default
+        active: production

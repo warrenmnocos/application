@@ -29,8 +29,6 @@ import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.validation.constraints.NotNull;
-import javax.xml.bind.annotation.XmlElement;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -75,23 +73,18 @@ public class AccountUserGrantedAuthority
     @CreatedBy
     @Column(name = "creator",
             nullable = false)
-    @NotNull
     protected String creator;
 
     @CreatedDate
     @Column(nullable = false,
             name = "creation_date")
     @Temporal(TemporalType.TIMESTAMP)
-    @NotNull
-    @XmlElement
     protected Date createdDate;
 
     @LastModifiedDate
     @Column(nullable = false,
             name = "last_modified_date")
     @Temporal(TemporalType.TIMESTAMP)
-    @NotNull
-    @XmlElement
     protected Date lastModifiedDate;
 
     public AccountUserGrantedAuthority() {
