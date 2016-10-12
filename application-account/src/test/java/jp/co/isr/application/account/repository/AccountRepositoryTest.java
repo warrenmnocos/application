@@ -22,12 +22,14 @@ import java.util.stream.Stream;
 import javax.validation.ConstraintViolationException;
 import jp.co.isr.application.account.model.entity.Account;
 import jp.co.isr.application.account.model.entity.Address;
+import jp.co.isr.application.account.repository.AccountRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,8 +40,9 @@ import org.springframework.transaction.annotation.Transactional;
  * @since 1.0
  * @version 1.0
  */
-//@RunWith(SpringRunner.class)
-//@DataJpaTest
+@RunWith(SpringRunner.class)
+@ActiveProfiles("test")
+@DataJpaTest
 public class AccountRepositoryTest {
 
     @Autowired
@@ -51,7 +54,7 @@ public class AccountRepositoryTest {
         this.random = new Random();
     }
 
-    //@Test
+    @Test
     @Transactional
     public void saveAccountPositiveTest() {
         Account account = new Account();
@@ -87,7 +90,7 @@ public class AccountRepositoryTest {
         Assertions.assertThat(accountFromRepository.get().getContacts()).containsAllEntriesOf(account.getContacts());
     }
 
-    //@Test(expected = ConstraintViolationException.class)
+    @Test(expected = ConstraintViolationException.class)
     @Transactional
     public void saveAccountNegativeEmailConstraintViolationTest() {
         Account account = new Account();
@@ -109,7 +112,7 @@ public class AccountRepositoryTest {
                 });
     }
 
-    //@Test(expected = ConstraintViolationException.class)
+    @Test(expected = ConstraintViolationException.class)
     @Transactional
     public void saveAccountNegativeFirstNameConstraintViolationTest() {
         Account account = new Account();
@@ -131,7 +134,7 @@ public class AccountRepositoryTest {
                 });
     }
 
-    //@Test(expected = ConstraintViolationException.class)
+    @Test(expected = ConstraintViolationException.class)
     @Transactional
     public void saveAccountNegativeLastNameConstraintViolationTest() {
         Account account = new Account();
@@ -152,7 +155,7 @@ public class AccountRepositoryTest {
                 });
     }
 
-    //@Test(expected = ConstraintViolationException.class)
+    @Test(expected = ConstraintViolationException.class)
     @Transactional
     public void saveAccountNegativeCreatorConstraintViolationTest() {
         Account account = new Account();
@@ -174,7 +177,8 @@ public class AccountRepositoryTest {
                 });
     }
 
-    //@Test
+    @Test
+    @Transactional
     public void findAllAsStreamPositiveTest() {
         String[] accountsAsText = new String[]{
             "warrenmnocos@gmail.com,Warren,Manlangit,Nocos,ANONYMOUS",
@@ -201,7 +205,7 @@ public class AccountRepositoryTest {
         Assertions.assertThat(accountsCount).isEqualTo(accountsAsText.length);
     }
 
-    //@Test
+    @Test
     @Transactional
     public void findAllAsStreamNegativeTest() {
         String[] accountsAsText = new String[]{
@@ -229,7 +233,7 @@ public class AccountRepositoryTest {
         Assertions.assertThat(accountsCount).isNotEqualTo(accountsAsText.length + 1);
     }
 
-    //@Test
+    @Test
     @Transactional
     public void findAllAsPagedStreamPositiveTest() {
         String[] accountsAsText = new String[]{
@@ -263,7 +267,7 @@ public class AccountRepositoryTest {
         Assertions.assertThat(accountsCount).isEqualTo(0);
     }
 
-    //@Test
+    @Test
     @Transactional
     public void findAllAsPagedStreamNegativeTest() {
         String[] accountsAsText = new String[]{
@@ -295,7 +299,7 @@ public class AccountRepositoryTest {
         Assertions.assertThat(accountsCount).isNotEqualTo(0);
     }
 
-    //@Test
+    @Test
     @Transactional
     public void findByEmailPositiveTest() {
         Account account = new Account();
@@ -319,8 +323,7 @@ public class AccountRepositoryTest {
         Assertions.assertThat(accountFromRepository.get().getEmail()).isEqualTo(account.getEmail());
     }
 
-   // @Test
-    @Transactional
+    @Test
     public void findByEmailNegativeTest() {
         Account account = new Account();
         account.setEmail("warrenmnocos@gmail.com");
@@ -341,7 +344,7 @@ public class AccountRepositoryTest {
         Assertions.assertThat(accountFromRepository.isPresent()).isFalse();
     }
 
-  //  @Test
+    @Test
     @Transactional
     public void findByIdPositiveTest() {
         Account account = new Account();
@@ -365,8 +368,7 @@ public class AccountRepositoryTest {
         Assertions.assertThat(accountFromRepository.get().getId()).isEqualTo(account.getId());
     }
 
-   // @Test
-    @Transactional
+    @Test
     public void findByIdNegativeTest() {
         Account account = new Account();
         account.setEmail("warrenmnocos@gmail.com");

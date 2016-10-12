@@ -19,6 +19,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
@@ -35,6 +36,7 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
  * @version 1.0
  */
 @SpringBootApplication
+@EnableDiscoveryClient
 @EnableJpaAuditing
 public class Application extends SpringBootServletInitializer {
 

@@ -20,7 +20,6 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import javax.validation.constraints.NotNull;
 import jp.co.isr.application.account.model.dto.AccountDto;
 import jp.co.isr.application.account.model.entity.Account;
@@ -47,17 +46,6 @@ public interface AccountLoginAuditService {
     void audit(@NotNull AccountDto accountDto) throws AccountNotFoundException;
 
     /**
-     * Retrieves all unique dates where there were {@link AccountUserDetails}
-     * login activities. This is not efficient if plenty of
-     * {@link AccountUserDetails} records are stored. Use
-     * {@link AccountLoginAuditService#findDatesWithLoginActivity(java.lang.Integer, java.lang.Integer)}
-     * instead to paginate results. Results are sorted in ascending order.
-     *
-     * @return {@link Collection} of {@link LocalDate} of all the unique dates
-     */
-    Collection<LocalDate> findDatesWithLoginActivityAscendingly();
-
-    /**
      * Retrieves all unique {@link LocalDate} where there were
      * {@link AccountUserDetails} login activities, in pagination. Results are
      * sorted in ascending order.
@@ -67,22 +55,8 @@ public interface AccountLoginAuditService {
      * @return {@link Collection} of {@link LocalDate} of all the unique dates
      * in pagination
      */
-    Collection<LocalDate> findDatesWithLoginActivityAscendingly(@NotNull Integer page, @NotNull Integer pageSize);
-
-    /**
-     * Retrieves all {@link AccountDto} with login activity. Results may be
-     * filtered with specified start and end {@link AccountDto}. To paginate
-     * results, use
-     * {@link AccountLoginAuditService#findAccountsWithLoginActivity(java.util.Optional, java.util.Optional, java.lang.Integer, java.lang.Integer) }.
-     * Results are in ascending order.
-     *
-     * @param start an {@link Optional} starting {@link LocalDate}, used to
-     * filter results
-     * @param end an {@link Set} ending {@link LocalDate}, used to filter
-     * results
-     * @return {@link Collection} of {@link AccountDto}
-     */
-    Collection<AccountDto> findAccountsWithLoginActivityAscendingly(Optional<LocalDate> start, Optional<LocalDate> end);
+    Collection<LocalDate> findDatesWithLoginActivityAscendingly(
+            Optional<Integer> page, Optional<Integer> pageSize);
 
     /**
      * Retrieves all {@link AccountDto} with login activity. Results may be
@@ -98,7 +72,7 @@ public interface AccountLoginAuditService {
      * @return {@link Collection} of {@link AccountDto}
      */
     Collection<AccountDto> findAccountsWithLoginActivityAscendingly(Optional<LocalDate> start,
-            Optional<LocalDate> end, @NotNull Integer page, @NotNull Integer pageSize);
+            Optional<LocalDate> end, Optional<Integer> page, Optional<Integer> pageSize);
 
     /**
      * Retrieves accounts with login records. Results can be filtered using
@@ -119,28 +93,5 @@ public interface AccountLoginAuditService {
     Map<String, Long> findFilteredAccountsWithLoginAudit(Optional<LocalDate> start,
             Optional<LocalDate> end, Collection<String> emails, Collection<String> firstNames,
             Collection<String> middleNames, Collection<String> lastNames);
-
-    /**
-     * Retrieves accounts with login records. Results can be filtered using
-     * specified arguments. Results are also paginated.
-     *
-     * @param start used to filter results through
-     * {@link AccountLoginAudit#loginTime}
-     * @param end used to filter results through
-     * {@link AccountLoginAudit#loginTime}
-     * @param emails used to filter results through {@link Account#email}
-     * @param firstNames used to filter results through
-     * {@link Account#firstName}
-     * @param middleNames used to filter results through
-     * {@link Account#middleName}
-     * @param lastNames used to filter results through {@link Account#lastName}
-     * @param page the page
-     * @param pageSize the page size
-     * @return
-     */
-    Map<String, Long> findFilteredAccountsWithLoginAudit(Optional<LocalDate> start,
-            Optional<LocalDate> end, Collection<String> emails, Collection<String> firstNames,
-            Collection<String> middleNames, Collection<String> lastNames,
-            @NotNull Integer page, @NotNull Integer pageSize);
 
 }

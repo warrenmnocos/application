@@ -32,8 +32,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * This is the test class for {@link AccountLoginAuditRepository}.
@@ -43,6 +44,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  * @version 1.0
  */
 @RunWith(SpringRunner.class)
+@ActiveProfiles("test")
 @DataJpaTest
 public class AccountLoginAuditRepositoryTest {
 
@@ -78,11 +80,12 @@ public class AccountLoginAuditRepositoryTest {
             "warrenloiusnocos@gmail.com,Warren,Loius,Nocos,ANONYMOUS",
             "warrenquizanocos@gmail.com,Warren,Quiza,Nocos,ANONYMOUS",
             "warrenwevicknocos@gmail.com,Warren,Wevick,Nocos,ANONYMOUS"};
+        ZoneId defaultZoneId = ZoneId.systemDefault();
         loginDates = new Date[30];
         for (int index = 0; index < loginDates.length; index++) {
             loginDates[index] = Date.from(ZonedDateTime.of(
                     LocalDate.of(2016, Month.SEPTEMBER, index + 1),
-                    LocalTime.MIN, ZoneId.systemDefault()).toInstant());
+                    LocalTime.MIN, defaultZoneId).toInstant());
         }
     }
 
@@ -123,6 +126,7 @@ public class AccountLoginAuditRepositoryTest {
     }
 
     @Test
+    @Transactional
     public void findByFiltersFirstNamesMiddleNamesLastNamesPositiveTest() {
         populateAccount();
         populateAccountLoginAudits();
@@ -135,8 +139,7 @@ public class AccountLoginAuditRepositoryTest {
                 Collections.emptyList(),
                 firstNames,
                 middleNames,
-                lastNames,
-                new PageRequest(0, Integer.MAX_VALUE)).size();
+                lastNames).size();
         // Always correct
         long correctSize = accountLoginAuditRepository.findAll()
                 .parallelStream()
@@ -156,6 +159,7 @@ public class AccountLoginAuditRepositoryTest {
     }
 
     @Test
+    @Transactional
     public void findByFiltersFirstNamesMiddleNamesPositiveTest() {
         populateAccount();
         populateAccountLoginAudits();
@@ -167,8 +171,7 @@ public class AccountLoginAuditRepositoryTest {
                 Collections.emptyList(),
                 firstNames,
                 middleNames,
-                Collections.emptyList(),
-                new PageRequest(0, Integer.MAX_VALUE)).size();
+                Collections.emptyList()).size();
         // Always correct
         long correctSize = accountLoginAuditRepository.findAll()
                 .parallelStream()
@@ -187,6 +190,7 @@ public class AccountLoginAuditRepositoryTest {
     }
 
     @Test
+    @Transactional
     public void findByFiltersFirstNamesLastNamesPositiveTest() {
         populateAccount();
         populateAccountLoginAudits();
@@ -198,8 +202,7 @@ public class AccountLoginAuditRepositoryTest {
                 Collections.emptyList(),
                 firstNames,
                 Collections.emptyList(),
-                lastNames,
-                new PageRequest(0, Integer.MAX_VALUE)).size();
+                lastNames).size();
         // Always correct
         long correctSize = accountLoginAuditRepository.findAll()
                 .parallelStream()
@@ -218,6 +221,7 @@ public class AccountLoginAuditRepositoryTest {
     }
 
     @Test
+    @Transactional
     public void findByFiltersMiddleNamesLastNamesPositiveTest() {
         populateAccount();
         populateAccountLoginAudits();
@@ -229,8 +233,7 @@ public class AccountLoginAuditRepositoryTest {
                 Collections.emptyList(),
                 Collections.emptyList(),
                 middleNames,
-                lastNames,
-                new PageRequest(0, Integer.MAX_VALUE)).size();
+                lastNames).size();
         // Always correct
         long correctSize = accountLoginAuditRepository.findAll()
                 .parallelStream()
@@ -249,6 +252,7 @@ public class AccountLoginAuditRepositoryTest {
     }
 
     @Test
+    @Transactional
     public void findByFiltersEmailsPositiveTest() {
         populateAccount();
         populateAccountLoginAudits();
@@ -259,8 +263,7 @@ public class AccountLoginAuditRepositoryTest {
                 emails,
                 Collections.emptyList(),
                 Collections.emptyList(),
-                Collections.emptyList(),
-                new PageRequest(0, Integer.MAX_VALUE)).size();
+                Collections.emptyList()).size();
         // Always correct
         long correctSize = accountLoginAuditRepository.findAll()
                 .parallelStream()
@@ -278,6 +281,7 @@ public class AccountLoginAuditRepositoryTest {
     }
 
     @Test
+    @Transactional
     public void findByFiltersFirstNamesPositiveTest() {
         populateAccount();
         populateAccountLoginAudits();
@@ -288,8 +292,7 @@ public class AccountLoginAuditRepositoryTest {
                 Collections.emptyList(),
                 firstNames,
                 Collections.emptyList(),
-                Collections.emptyList(),
-                new PageRequest(0, Integer.MAX_VALUE)).size();
+                Collections.emptyList()).size();
         // Always correct
         long correctSize = accountLoginAuditRepository.findAll()
                 .parallelStream()
@@ -307,6 +310,7 @@ public class AccountLoginAuditRepositoryTest {
     }
 
     @Test
+    @Transactional
     public void findByFiltersEmailsFirstNamesPositiveTest() {
         populateAccount();
         populateAccountLoginAudits();
@@ -318,9 +322,7 @@ public class AccountLoginAuditRepositoryTest {
                 emails,
                 firstNames,
                 Collections.emptyList(),
-                Collections.emptyList(),
-                new PageRequest(0, Integer.MAX_VALUE)
-        ).size();
+                Collections.emptyList()).size();
         // Always correct
         long correctSize = accountLoginAuditRepository.findAll()
                 .parallelStream()
@@ -339,6 +341,7 @@ public class AccountLoginAuditRepositoryTest {
     }
 
     @Test
+    @Transactional
     public void findByFiltersLastNamePositiveTest() {
         populateAccount();
         populateAccountLoginAudits();
@@ -349,8 +352,7 @@ public class AccountLoginAuditRepositoryTest {
                 Collections.emptyList(),
                 Collections.emptyList(),
                 Collections.emptyList(),
-                lastNames,
-                new PageRequest(0, Integer.MAX_VALUE)).size();
+                lastNames).size();
         // Always correct
         long correctSize = accountLoginAuditRepository.findAll()
                 .parallelStream()
@@ -368,6 +370,7 @@ public class AccountLoginAuditRepositoryTest {
     }
 
     @Test
+    @Transactional
     public void findByFiltersEmailsFirstNamesLastNamesPositiveTest() {
         populateAccount();
         populateAccountLoginAudits();
@@ -380,8 +383,7 @@ public class AccountLoginAuditRepositoryTest {
                 emails,
                 firstNames,
                 Collections.emptyList(),
-                lastNames,
-                new PageRequest(0, Integer.MAX_VALUE)).size();
+                lastNames).size();
         // Always correct
         long correctSize = accountLoginAuditRepository.findAll()
                 .parallelStream()
@@ -401,6 +403,7 @@ public class AccountLoginAuditRepositoryTest {
     }
 
     @Test
+    @Transactional
     public void findByFiltersMiddleNamePositiveTest() {
         populateAccount();
         populateAccountLoginAudits();
@@ -411,8 +414,7 @@ public class AccountLoginAuditRepositoryTest {
                 Collections.emptyList(),
                 Collections.emptyList(),
                 middleNames,
-                Collections.emptyList(),
-                new PageRequest(0, Integer.MAX_VALUE)).size();
+                Collections.emptyList()).size();
         // Always correct
         long correctSize = accountLoginAuditRepository.findAll()
                 .parallelStream()
@@ -430,6 +432,7 @@ public class AccountLoginAuditRepositoryTest {
     }
 
     @Test
+    @Transactional
     public void findByFiltersEmailsFirstNamesMiddleNamesLastNamesPositiveTest() {
         populateAccount();
         populateAccountLoginAudits();
@@ -443,8 +446,7 @@ public class AccountLoginAuditRepositoryTest {
                 emails,
                 firstNames,
                 middleNames,
-                lastNames,
-                new PageRequest(0, Integer.MAX_VALUE)).size();
+                lastNames).size();
         // Always correct
         long correctSize = accountLoginAuditRepository.findAll()
                 .parallelStream()

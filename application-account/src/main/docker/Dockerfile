@@ -11,8 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 FROM openjdk:8
-FROM postgresql:latest
 MAINTAINER Warren Nocos <warrenmnocos@gmail.com>
 ADD application-account-1.0.war app.war
 EXPOSE 8082

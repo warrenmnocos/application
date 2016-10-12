@@ -23,8 +23,6 @@ import jp.co.isr.application.account.model.dto.AccountWithUserDetailsDto;
 import jp.co.isr.application.account.service.AccountService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -52,7 +50,7 @@ public class AccountServiceRestEndpoint implements AccountService {
      * Constructs an implementation of {@link AccountService} that exposes
      * specified implementation into a RESTful web service.
      *
-     * @param accountService
+     * @param accountService the {@link AccountService}
      */
     @Inject
     public AccountServiceRestEndpoint(
@@ -111,18 +109,16 @@ public class AccountServiceRestEndpoint implements AccountService {
      * {@inheritDoc }
      */
     @Override
-    @PostMapping
     public void saveAccount(@RequestBody AccountWithUserDetailsDto accountWithUserDetailsDto) {
-        accountService.saveAccount(accountWithUserDetailsDto);
+        throw new UnsupportedOperationException("This operation is not yet supported");
     }
 
     /**
      * {@inheritDoc }
      */
     @Override
-    @PutMapping
     public void updateAccount(@RequestBody AccountWithUserDetailsDto accountWithUserDetailsDto) {
-        accountService.updateAccount(accountWithUserDetailsDto);
+        throw new UnsupportedOperationException("This operation is not yet supported");
     }
 
 }

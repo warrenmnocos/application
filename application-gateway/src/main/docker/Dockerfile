@@ -11,7 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 FROM openjdk:8
-ADD nb-springboot-docker.jar app.jar
-EXPOSE 8081
-ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/app.jar"]
+MAINTAINER Warren Nocos <warrenmnocos@gmail.com>
+ADD application-gateway-1.0.war app.war
+EXPOSE 80
+ENTRYPOINT ["java","-jar","/app.war"]

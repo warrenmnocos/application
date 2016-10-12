@@ -44,8 +44,17 @@ import org.springframework.web.bind.annotation.RestController;
         produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 public class AccountLoginAuditServiceRestEndpoint implements AccountLoginAuditService {
 
+    /**
+     * This is where operations are delegated.
+     */
     protected final AccountLoginAuditService accountLoginAuditService;
 
+    /**
+     * Constructs an implementation of {@link AccountLoginAuditService} that
+     * exposes specified implementation into a RESTful web service.
+     *
+     * @param accountLoginAuditService the {@link AccountLoginAuditService}
+     */
     @Inject
     public AccountLoginAuditServiceRestEndpoint(
             @Named("accountLoginAuditServiceImpl") AccountLoginAuditService accountLoginAuditService) {
@@ -64,18 +73,10 @@ public class AccountLoginAuditServiceRestEndpoint implements AccountLoginAuditSe
      * {@inheritDoc }
      */
     @Override
-    @GetMapping("/dates")
-    public Collection<LocalDate> findDatesWithLoginActivityAscendingly() {
-        return accountLoginAuditService.findDatesWithLoginActivityAscendingly();
-    }
-
-    /**
-     * {@inheritDoc }
-     */
-    @Override
-    @GetMapping(params = {"page", "size"}, path = "/dates")
+    @GetMapping(path = "/dates")
     public Collection<LocalDate> findDatesWithLoginActivityAscendingly(
-            @RequestParam("page") Integer page, @RequestParam("size") Integer pageSize) {
+            @RequestParam("page") Optional<Integer> page,
+            @RequestParam("size") Optional<Integer> pageSize) {
         return accountLoginAuditService.findDatesWithLoginActivityAscendingly(page, pageSize);
     }
 
@@ -86,19 +87,9 @@ public class AccountLoginAuditServiceRestEndpoint implements AccountLoginAuditSe
     @GetMapping("/users")
     public Collection<AccountDto> findAccountsWithLoginActivityAscendingly(
             @DateTimeFormat(pattern = "yyyyMMdd") @RequestParam("start") Optional<LocalDate> start,
-            @DateTimeFormat(pattern = "yyyyMMdd") @RequestParam("end") Optional<LocalDate> end) {
-        return accountLoginAuditService.findAccountsWithLoginActivityAscendingly(start, end);
-    }
-
-    /**
-     * {@inheritDoc }
-     */
-    @Override
-    @GetMapping(params = {"page", "size"}, path = "/users")
-    public Collection<AccountDto> findAccountsWithLoginActivityAscendingly(
-            @DateTimeFormat(pattern = "yyyyMMdd") @RequestParam("start") Optional<LocalDate> start,
             @DateTimeFormat(pattern = "yyyyMMdd") @RequestParam("end") Optional<LocalDate> end,
-            @RequestParam("page") Integer page, @RequestParam("size") Integer pageSize) {
+            @RequestParam("page") Optional<Integer> page,
+            @RequestParam("size") Optional<Integer> pageSize) {
         return accountLoginAuditService.findAccountsWithLoginActivityAscendingly(start, end, page, pageSize);
     }
 
@@ -115,22 +106,6 @@ public class AccountLoginAuditServiceRestEndpoint implements AccountLoginAuditSe
             @RequestParam(name = "middleName", required = false) Collection<String> middleNames,
             @RequestParam(name = "lastName", required = false) Collection<String> lastNames) {
         return accountLoginAuditService.findFilteredAccountsWithLoginAudit(start, end, emails, firstNames, middleNames, lastNames);
-    }
-
-    /**
-     * {@inheritDoc }
-     */
-    @Override
-    @GetMapping(params = {"page", "size"}, path = "/logins")
-    public Map<String, Long> findFilteredAccountsWithLoginAudit(
-            @DateTimeFormat(pattern = "yyyyMMdd") @RequestParam("start") Optional<LocalDate> start,
-            @DateTimeFormat(pattern = "yyyyMMdd") @RequestParam("end") Optional<LocalDate> end,
-            @RequestParam(name = "email", required = false) Collection<String> emails,
-            @RequestParam(name = "firstName", required = false) Collection<String> firstNames,
-            @RequestParam(name = "middleName", required = false) Collection<String> middleNames,
-            @RequestParam(name = "lastName", required = false) Collection<String> lastNames,
-            @RequestParam("page") Integer page, @RequestParam("size") Integer pageSize) {
-        return accountLoginAuditService.findFilteredAccountsWithLoginAudit(start, end, emails, firstNames, middleNames, lastNames, page, pageSize);
     }
 
 }

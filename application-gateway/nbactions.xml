@@ -7,4 +7,11 @@
                 <goal>spring-boot:run</goal>
             </goals>
         </action>
+        <action>
+            <actionName>CUSTOM-docker:build</actionName>
+            <displayName>docker:build</displayName>
+            <goals>
+                <goal>docker:build</goal>
+            </goals>
+        </action>
     </actions>

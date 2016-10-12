@@ -113,12 +113,11 @@ public interface AccountLoginAuditRepository
      * {@link Account#middleName}
      * @param lastNames the {@code lastNames}, mapped to
      * {@link Account#lastName}
-     * @param pageable the {@link Pageable}
      * @return the {@link List} of {@link Account}
      */
     default List<AccountLoginAudit> findByFilters(Date start, Date end,
             Collection<String> emails, Collection<String> firstNames,
-            Collection<String> middleNames, Collection<String> lastNames, Pageable pageable) {
+            Collection<String> middleNames, Collection<String> lastNames) {
         return findAll((root, criteriaQuery, criteriaBuilder) -> {
             Collection<Predicate> andPredicates = new ArrayList<>(4);
 
@@ -161,7 +160,24 @@ public interface AccountLoginAuditRepository
 
             // Join predicates - explicitly present to all criteria
             return criteriaBuilder.and(andPredicates.toArray(new Predicate[andPredicates.size()]));
-        }, pageable).getContent();
+        });
     }
+
+    /**
+     * Retrieves all {@link AccountLoginAudit} in a {@link STream}.
+     *
+     * @return the {@link Stream} of {@link AccountLoginAudit}.
+     */
+    @Query("SELECT accountLoginAudit FROM AccountLoginAudit accountLoginAudit")
+    Stream<AccountLoginAudit> findAllAsStream();
+
+    /**
+     * Retrieves all {@link AccountLoginAudit} in pagination.
+     *
+     * @param pageable the {@link Pageable}
+     * @return the {@link Stream} of {@link AccountLoginAudit}.
+     */
+    @Query("SELECT accountLoginAudit FROM AccountLoginAudit accountLoginAudit")
+    Stream<AccountLoginAudit> findAllAsPagedStream(Pageable pageable);
 
 }

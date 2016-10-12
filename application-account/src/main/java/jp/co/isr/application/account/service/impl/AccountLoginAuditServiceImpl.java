@@ -24,10 +24,11 @@ import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.security.RolesAllowed;
@@ -112,24 +113,17 @@ public class AccountLoginAuditServiceImpl implements AccountLoginAuditService {
      * {@inheritDoc }
      */
     @Override
-    public Collection<LocalDate> findDatesWithLoginActivityAscendingly() {
-        return findDatesWithLoginActivityAscendingly(0, Integer.MAX_VALUE);
-    }
-
-    /**
-     * {@inheritDoc }
-     */
-    @Override
     public Collection<LocalDate> findDatesWithLoginActivityAscendingly(
-            @NotNull Integer page, @NotNull Integer pageSize) {
+            Optional<Integer> page, Optional<Integer> pageSize) {
         ZoneId defaultZoneId = ZoneId.systemDefault();
-        try (Stream<LocalDate> dates = accountLoginAuditRepository.findAllLoginDate(new PageRequest(page, pageSize))
+        try (Stream<LocalDate> dates = accountLoginAuditRepository.findAllLoginDate(
+                new PageRequest(page.orElse(0), pageSize.orElse(Integer.MAX_VALUE)))
                 .parallel()
                 .map(Date::getTime)
                 .map(Instant::ofEpochMilli)
                 .map(instant -> instant.atZone(defaultZoneId).toLocalDate())
                 .distinct()) {
-            return dates.collect(Collectors.toList());
+            return dates.collect(Collectors.toCollection(TreeSet::new));
         }
     }
 
@@ -137,31 +131,26 @@ public class AccountLoginAuditServiceImpl implements AccountLoginAuditService {
      * {@inheritDoc }
      */
     @Override
-    public Collection<AccountDto> findAccountsWithLoginActivityAscendingly(
-            Optional<LocalDate> start, Optional<LocalDate> end) {
-        return findAccountsWithLoginActivityAscendingly(start, end, 0, Integer.MAX_VALUE);
-    }
-
-    /**
-     * {@inheritDoc }
-     */
-    @Override
     public Collection<AccountDto> findAccountsWithLoginActivityAscendingly(Optional<LocalDate> start,
-            Optional<LocalDate> end, @NotNull Integer page, @NotNull Integer pageSize) {
+            Optional<LocalDate> end, Optional<Integer> page, Optional<Integer> pageSize) {
         if (start.isPresent() && end.isPresent()) {
             ZoneId systemZoneId = ZoneId.systemDefault();
             Date from = Date.from(ZonedDateTime.of(start.get(), LocalTime.MIN, systemZoneId).toInstant());
             Date to = Date.from(ZonedDateTime.of(end.get(), LocalTime.MAX, systemZoneId).toInstant());
             checkDates(from, to);
-            return getAccountsDtoFrom(accountLoginAuditRepository.findAccountsBetweenLoginTimeInclusive(from, to, new PageRequest(page, pageSize)));
+            return getAccountsDtoFrom(accountLoginAuditRepository.findAccountsBetweenLoginTimeInclusive(
+                    from, to, new PageRequest(page.orElse(0), pageSize.orElse(Integer.MAX_VALUE))));
         } else if (start.isPresent()) {
             Date from = Date.from(ZonedDateTime.of(start.get(), LocalTime.MIN, ZoneId.systemDefault()).toInstant());
-            return getAccountsDtoFrom(accountLoginAuditRepository.findAccountsAfterLoginTimeInclusive(from, new PageRequest(page, pageSize)));
+            return getAccountsDtoFrom(accountLoginAuditRepository.findAccountsAfterLoginTimeInclusive(
+                    from, new PageRequest(page.orElse(0), pageSize.orElse(Integer.MAX_VALUE))));
         } else if (end.isPresent()) {
             Date to = Date.from(ZonedDateTime.of(end.get(), LocalTime.MAX, ZoneId.systemDefault()).toInstant());
-            return getAccountsDtoFrom(accountLoginAuditRepository.findAccountsBeforeLoginTimeInclusive(to, new PageRequest(page, pageSize)));
+            return getAccountsDtoFrom(accountLoginAuditRepository.findAccountsBeforeLoginTimeInclusive(
+                    to, new PageRequest(page.orElse(0), pageSize.orElse(Integer.MAX_VALUE))));
         } else {
-            return getAccountsDtoFrom(accountLoginAuditRepository.findAccountsWithLoginAudit(new PageRequest(page, pageSize)));
+            return getAccountsDtoFrom(accountLoginAuditRepository.findAccountsWithLoginAudit(
+                    new PageRequest(page.orElse(0), pageSize.orElse(Integer.MAX_VALUE))));
         }
     }
 
@@ -172,18 +161,6 @@ public class AccountLoginAuditServiceImpl implements AccountLoginAuditService {
     public Map<String, Long> findFilteredAccountsWithLoginAudit(Optional<LocalDate> start,
             Optional<LocalDate> end, Collection<String> emails, Collection<String> firstNames,
             Collection<String> middleNames, Collection<String> lastNames) {
-        return findFilteredAccountsWithLoginAudit(start, end, emails, firstNames,
-                middleNames, lastNames, 0, Integer.MAX_VALUE);
-    }
-
-    /**
-     * {@inheritDoc }
-     */
-    @Override
-    public Map<String, Long> findFilteredAccountsWithLoginAudit(Optional<LocalDate> start,
-            Optional<LocalDate> end, Collection<String> emails, Collection<String> firstNames,
-            Collection<String> middleNames, Collection<String> lastNames,
-            @NotNull Integer page, @NotNull Integer pageSize) {
         Date from = null, to = null;
         if (start.isPresent() && end.isPresent()) {
             ZoneId systemZoneId = ZoneId.systemDefault();
@@ -195,12 +172,12 @@ public class AccountLoginAuditServiceImpl implements AccountLoginAuditService {
         } else if (end.isPresent()) {
             to = Date.from(ZonedDateTime.of(end.get(), LocalTime.MAX, ZoneId.systemDefault()).toInstant());
         }
-        return accountLoginAuditRepository.findByFilters(from, to,
+        List<AccountLoginAudit> accountLoginAudits = accountLoginAuditRepository.findByFilters(from, to,
                 emails == null ? Collections.emptyList() : emails,
                 firstNames == null ? Collections.emptyList() : firstNames,
                 middleNames == null ? Collections.emptyList() : middleNames,
-                lastNames == null ? Collections.emptyList() : lastNames,
-                new PageRequest(page, pageSize)).stream()
+                lastNames == null ? Collections.emptyList() : lastNames);
+        return accountLoginAudits.stream()
                 .map(AccountLoginAudit::getAccount)
                 .collect(Collectors.groupingBy(
                         Account::getEmail,
@@ -222,7 +199,7 @@ public class AccountLoginAuditServiceImpl implements AccountLoginAuditService {
     protected Collection<AccountDto> getAccountsDtoFrom(Stream<Account> accountsStreamSupplier) {
         try (Stream<AccountDto> accounts = accountsStreamSupplier.parallel()
                 .map(accountModelService::toAccountDto)) {
-            return accounts.collect(Collectors.toCollection(HashSet::new));
+            return accounts.collect(Collectors.toCollection(TreeSet::new));
         }
     }
 

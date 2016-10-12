@@ -49,7 +49,8 @@ import jp.co.isr.application.account.repository.AccountRepository;
 import jp.co.isr.application.account.repository.AccountUserDetailsRepository;
 import jp.co.isr.application.account.repository.AccountUserGrantedAuthorityRepository;
 import jp.co.isr.application.account.service.DataPopulatorService;
-import org.springframework.context.annotation.Profile;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -66,7 +67,7 @@ import org.springframework.transaction.support.TransactionTemplate;
  * @version 1.0
  */
 @Service
-@Profile("installation")
+@RefreshScope
 @Transactional(readOnly = true)
 public class DataPopulatorServiceImpl implements DataPopulatorService {
 
@@ -96,6 +97,8 @@ public class DataPopulatorServiceImpl implements DataPopulatorService {
 
     protected final Random random;
 
+    protected final boolean populateDatabase;
+
     @Inject
     public DataPopulatorServiceImpl(AccountRepository accountRepository,
             AccountUserGrantedAuthorityRepository accountUserGrantedAuthorityRepository,
@@ -104,7 +107,8 @@ public class DataPopulatorServiceImpl implements DataPopulatorService {
             AccountClientGrantedAuthorityRepository accountClientGrantedAuthorityRepository,
             AccountClientDetailsRepository accountClientDetailsRepository,
             PlatformTransactionManager platformTransactionManager,
-            @Named("bCryptPasswordEncoder") PasswordEncoder passwordEncoder) {
+            @Named("bCryptPasswordEncoder") PasswordEncoder passwordEncoder,
+            @Value("${application.account.service.populate-database}") boolean populateDatabase) {
         this.accountRepository = accountRepository;
         this.accountUserGrantedAuthorityRepository = accountUserGrantedAuthorityRepository;
         this.accountUserDetailsRepository = accountUserDetailsRepository;
@@ -114,6 +118,7 @@ public class DataPopulatorServiceImpl implements DataPopulatorService {
         this.transactionTemplate = new TransactionTemplate(platformTransactionManager);
         this.passwordEncoder = passwordEncoder;
         this.random = new Random();
+        this.populateDatabase = populateDatabase;
     }
 
     /**
@@ -121,12 +126,14 @@ public class DataPopulatorServiceImpl implements DataPopulatorService {
      */
     @PostConstruct
     public void populate() {
-        populateAccountUserGrantedAuthority();
-        populateAccount();
-        populateAccountUserDetails();
-        populateAccountLoginAudit();
-        populateAccountClientGrantedAuthority();
-        populateAccountClientDetailsService();
+        if (populateDatabase) {
+            populateAccountUserGrantedAuthority();
+            populateAccount();
+            populateAccountUserDetails();
+            populateAccountLoginAudit();
+            populateAccountClientGrantedAuthority();
+            populateAccountClientDetailsService();
+        }
     }
 
     /**
