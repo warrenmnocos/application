@@ -61,14 +61,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
      */
     @Override
     public void configure(HttpSecurity http) throws Exception {
-        // Allow Swagger resources
         http.authorizeRequests()
-                .antMatchers("/v2/api-docs/**").permitAll()
-                .antMatchers("/configuration/ui/**").permitAll()
-                .antMatchers("/swagger-resources/**").permitAll()
-                .antMatchers("/configuration/security/**").permitAll()
-                .antMatchers("/swagger-ui.html").permitAll()
-                .antMatchers("/webjars/**").permitAll()
                 .antMatchers("/admin").hasAnyRole("ADMIN")
                 .anyRequest().authenticated();
     }
