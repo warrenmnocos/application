@@ -3,6 +3,7 @@ Objective
 -
 Use JPA to write a production quality RESTful web service application.
 
+---
 Requirements
 -
 > **Functional Requirements:** 
