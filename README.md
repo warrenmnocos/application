@@ -114,13 +114,16 @@ Sample:
 ```curl
 curl 104.199.173.188/account/api/rest/account/access/logins?access_token=8f67f7fb-3fc0-4dde-82fb-387e63e89e3f&firstName=Rica&firstName=Lo&firstName=Lou
 ```
+
+---
 Limitations
 ---
 - The application is not served in HTTPS.
 - Cannot add, and update user accounts.
 -  Cannot add client accounts (OAuth2).
 
+---
 References
 ---
-a. https://en.wikipedia.org/wiki/Microservices
-b. http://microservices.io/
+- https://en.wikipedia.org/wiki/Microservices
+- http://microservices.io/
