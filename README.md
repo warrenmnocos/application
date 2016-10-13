@@ -41,18 +41,22 @@ The diagram below shows the components or services for the application.
 ![Figure 1: High level services of the application](https://s11.postimg.org/kgs6vkgsz/components.jpg)
 
 - Gateway
-The gateway service defines how clients access the services in a microservices architecture. It provides a single entry point for clients, and external services to access the application.
+
+	The gateway service defines how clients access the services in a microservices architecture. It provides a single entry point for clients, and external services to access the application.
 The application uses Spring Cloud Netflix Zuul to implement the gateway.
 
 - Registry
-Service discovery pattern is used to route requests for a client to an available service instance in a microservices architecture, where services and service instances can grow and scale dramatically. WIth this, service-to-service calls are eased with added benefit of load balancing.
+
+	Service discovery pattern is used to route requests for a client to an available service instance in a microservices architecture, where services and service instances can grow and scale dramatically. WIth this, service-to-service calls are eased with added benefit of load balancing.
 The application leverages Spring Cloud Netflix Eureka to implement service discovery. Eureka is a client-side service discovery implementation, where services register themselves to the central service registry, and query for location of other services.
 
 - Config
-The application uses Spring Cloud Config as a central configuration server to all services. With this, services can be reconfigured anytime based on environment, profile, or demand, without shutdowns.
+
+	The application uses Spring Cloud Config as a central configuration server to all services. With this, services can be reconfigured anytime based on environment, profile, or demand, without shutdowns.
 
 - Account
-The account service is the only business service momentarily.
+
+	The account service is the only business service momentarily.
 
 With this architecture, the application is prepared for additional services to cater new requirements. Services are also ready to scale.
 
