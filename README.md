@@ -1,3 +1,4 @@
+
 Objective
 -
 Use JPA to write a production quality RESTful web service application.
@@ -79,6 +80,47 @@ Others
 
 All endpoints are secured with Spring Security and Spring Cloud OAuth2. OAuth2 is an open standard for authorizing clients to access resources. The following endpoint shows how to get an access token, which follows the resource owner password credentials grant type.
 
-| Endpont | Purpose| Method | Parameters             |
-| :-------| :----- | :----- | :----------------------|
-| http://104.199.173.188/account/oauth/token | Retrieves access token |  GET    |  HTTP Basic Credentials (Required) <br> - the `username` is the `client_id` <br> - the `password` is the `client_secret` |
+| Endpont | Purpose| Method | Parameters |
+| :--- | :--- | :--- | :--- |
+| http://104.199.173.188/account/oauth/token | Retrieves access token |  GET    |  **HTTP Basic Credentials (Required)** <br>  **a.**  the `username` is the `client_id` <br>  **b.**  the `password` is the `client_secret` |
+
+Sample syntax using `curl`:
+
+``` curl
+curl -XPOST d56h2sf5c5drsdgr4xpl234cm085021r:of7ho3vc86t00hd6bg7qrwpl12h754pl@104.199.173.188/account/oauth/token -d grant_type=password -d username=warrenwevicknocos@gmail.com -d password=1234
+```
+
+Sample response:
+
+```javascript
+{"access_token":"8f67f7fb-3fc0-4dde-82fb-387e63e89e3f","token_type":"bearer","refresh_token":"4d69f083-3e2c-4a1f-90ca-7e5ce394eb65","expires_in":3599,"scope":"read write"}
+```
+
+####Endpoints
+
+The following endpoints exposes several business service operations.
+	
+| **Endpoint** | **Purpose** | **Method** | **Parameters** | **Rights** |
+| :--- | :--- | :--- | :--- | :--- |
+| [http://104.199.173.188/account/api/rest/account](http://104.199.173.188/account/api/rest/account) | Retrieves all accounts | **GET** | **Authorization (Required)** <br> **a.** `access_token`: String (i.e. `access_token=xxxxxxx`), or Authorization header of `bearer` type (i.e. `Authorization: Bearer xxxxxxx`) <br> **Pagination (Optional)** <br> **a.** `page`: Integer (i.e. `page=0`) <br> **b.** `size`: Integer (i.e. `size=10`) | **ADMIN** |
+| [http://104.199.173.188/account/api/rest/account](http://104.199.173.188/account/api/rest/account) | Retrieves an account by its unique identifier | **GET** | **Authorization (Required)** <br> **a.** `access_token`: String (i.e. `access_token=xxxxxxx`), or Authorization header of `bearer` type (i.e. `Authorization: Bearer xxxxxxx`) <br> **Logical Parameter (Required)** <br>  **a.** `id`: Long (i.e. `id=3`) | **ADMIN** |
+| [http://104.199.173.188/account/api/rest/account](http://104.199.173.188/account/api/rest/account) | Retrieves an account by its email | **GET** | **Authorization (Required)** <br> **a.** `access_token`: String (i.e. `access_token=xxxxxxx`), or Authorization header of bearer type (i.e. `Authorization: Bearer xxxxxxx`) <br> **Logical Parameter (Required)** <br> **a.** `email`: String (i.e. `email=war@gmail.com`) | **ADMIN** |
+| [http://104.199.173.188/account/api/rest/account/me](http://104.199.173.188/account/api/rest/account/me) | Retrieves currently authenticated user | **GET** | **Authorization (Required)** <br> **a.** `access_token`: String (i.e. `access_token=xxxxxxx`), or Authorization header of bearer type (i.e. `Authorization: Bearer xxxxxxx`) | **ADMIN, USER** |
+| [http://104.199.173.188/account/api/rest/account/access/dates](http://104.199.173.188/account/api/rest/account/access/dates) | Retrieves all unique dates (ignoring time) with login activity | **GET** | **Authorization (Required)** <br> **a.** `access_token`: String (i.e. `access_token=xxxxxxx`), or Authorization header of bearer type (i.e. `Authorization: Bearer xxxxxxx`) <br> **Pagination (Optional)** <br> **a.** `page`: Integer (i.e. page=0) <br> **b.** `size`: Integer (i.e. `size=10`) | **ADMIN** |
+| [http://104.199.173.188/account/api/rest/account/access/users](http://104.199.173.188/account/api/rest/account/access/users) | Retrieves all unique users for which there is a login record between the start and end date | **GET** | **Authorization (Required)** <br> **a.** `access_token`: String (i.e. `access_token=xxxxxxx`), or Authorization header of bearer type (i.e. `Authorization: Bearer xxxxxxx`) <br> **Pagination (Optional)** <br> **a.** `page`: Integer (i.e. `page=0`) <br> **b.** `size`: Integer (i.e. `size=10`) <br> **Logical Parameter (Optional)** <br> **a.** `start`: String with format `yyyymmdd` (i.e. `20161001`) <br> **b.** `end`: String with format `yyyymmdd` (i.e. `20161001`) | **ADMIN** |
+| [http://104.199.173.188/account/api/rest/account/access/logins](http://104.199.173.188/account/api/rest/account/access/logins) | Retrieves a JSON object where the key is the user name and the value is the number of times a user logged on between the start and the end date. Results can also be filtered using email, first name, middle name, and last name. | **GET** | **Authorization (Required)** <br> **a.** `access_token`: String (i.e. `access_token=xxxxxxx`), or Authorization header of bearer type (i.e. `Authorization: Bearer xxxxxxx`) <br> **Pagination (Optional)** <br> **a.** page: Integer (i.e. page=0) <br> **b.** `size`: Integer (i.e. size=10) <br> **Logical Parameter (Optional)** <br> **a.** `start`: String with format `yyyymmdd` (i.e. `20161001`) <br> **b.** `end`: String with format `yyyymmdd` (i.e. `20161001`) <br> **c.** `email`: String (i.e. `email=xxx@xxx.xxx`) repeatable (i.e. `email=xxx@xxx.xxx&email=yyy@yyy.yyy` or `email=xxx@xxx.xxx,yyy@yyy.yyy`) <br> **d.** `firstName`: String (i.e. `firstName=Lou`) repeatable (i.e. `firstName=Lou&firstName=Rica` or `firstName=Lou,Rica`) <br> **e.** `middleName`: String (i.e. `middleName=Lou`) repeatable (i.e. `middleName=Lou&middleName=Rica` or `middleName=Lou,Rica`) <br> **f.** `lastName`: String (i.e. `firstName=Lou`) repeatable (i.e. `lastName=Lou&lastName=Rica` or `lastName=Lou,Rica`) | **ADMIN** |
+
+Sample:
+```curl
+curl 104.199.173.188/account/api/rest/account/access/logins?access_token=8f67f7fb-3fc0-4dde-82fb-387e63e89e3f&firstName=Rica&firstName=Lo&firstName=Lou
+```
+Limitations
+---
+- The application is not served in HTTPS.
+- Cannot add, and update user accounts.
+-  Cannot add client accounts (OAuth2).
+
+References
+---
+a. https://en.wikipedia.org/wiki/Microservices
+b. http://microservices.io/
