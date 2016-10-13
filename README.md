@@ -210,3 +210,8 @@ References
 - http://microservices.io/
 - https://github.com/spotify/docker-maven-plugin
 - https://docs.docker.com/engine/reference/commandline/
+
+---
+License
+---
+This project is licensed under Apache License 2.0.
