@@ -21,8 +21,11 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 
 /**
+ * This is for security configuration.
  *
  * @author Warren Nocos
+ * @since 1.0
+ * @version 1.0
  */
 @Configuration
 @EnableResourceServer
