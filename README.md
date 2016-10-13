@@ -1,17 +1,16 @@
-__OBJECTIVE__
+Objective
+-------------
 
-Use JPA to write a production quality RESTful web service application\.
+Use JPA to write a production quality RESTful web service application.
 
-__REQUIREMENTS__
+Requirements
+-------------
 
-1. __Functional Requirements__
-
-__	__Create a RESTful with the following functionalities;__	__
-
-- 
-	1. A service that retrieves a JSON array of all unique dates \(ignoring time\) in the table\. The resulting JSON array needs to be sorted in ascending order\.
-	2. A service that retrieves a JSON array of all unique users for which there is a login record between the start and end date\. Both parameters are optional, so there can be a start date, an end date, or both\. The resulting JSON array needs to be sorted in ascending order\.
-	3. A service that retrieves a JSON object where the key is the user name and the value is the number of times a user logged on between the start and the end date\. All parameters are optional\. The values used for the attributes are used as filters, i\.e\. only the records should be counted for which the attribute values are equal to the ones specified in the parameters\.
+> **Functional Requirements:**
+> Create a RESTful with the following functionalities;	
+>> - A service that retrieves a JSON array of all unique dates (ignoring time) in the table. The resulting JSON array needs to be sorted in ascending order.
+>>- A service that retrieves a JSON array of all unique users for which there is a login record between the start and end date. Both parameters are optional, so there can be a start date, an end date, or both. The resulting JSON array needs to be sorted in ascending order.
+>>- A service that retrieves a JSON object where the key is the user name and the value is the number of times a user logged on between the start and the end date. All parameters are optional. The values used for the attributes are used as filters, i.e. only the records should be counted for which the attribute values are equal to the ones specified in the parameters.
 
 1. __Non\-functional Requirements and Assumptions__
 	1. Basing the given functional requirements, the intention is somewhat to audit every login activity of every authenticated users\. A functionality that actually audits login activities is assumed\.
