@@ -174,7 +174,7 @@ curl -XPOST d56h2sf5c5drsdgr4xpl234cm085021r:of7ho3vc86t00hd6bg7qrwpl12h754pl@10
 
 Sample response:
 
-```javascript
+```json
 {"access_token":"8f67f7fb-3fc0-4dde-82fb-387e63e89e3f","token_type":"bearer","refresh_token":"4d69f083-3e2c-4a1f-90ca-7e5ce394eb65","expires_in":3599,"scope":"read write"}
 ```
 
