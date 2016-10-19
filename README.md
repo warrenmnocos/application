@@ -164,7 +164,7 @@ All endpoints are secured with Spring Security and Spring Cloud OAuth2. OAuth2 i
 
 | Endpont | Purpose| Method | Parameters |
 | :--- | :--- | :--- | :--- |
-| http://104.199.173.188/account/oauth/token | Retrieves access token |  GET    |  **HTTP Basic Credentials (Required)** <br> **a.**  the `username` is the `client_id` <br> **b.**  the `password` is the `client_secret` <br> **POST data (Required)** <br> **a.** `grant_type`: String, value must be `password` <br> **b.** `username`: String (i.e. `warrenwevicknocos@gmail.com`) <br> **c.** `password`: String (i.e. `1234`) |
+| http://104.199.173.188/account/oauth/token | Retrieves access token |  **POST**    |  **HTTP Basic Credentials (Required)** <br> **a.**  the `username` is the `client_id` <br> **b.**  the `password` is the `client_secret` <br> **POST data (Required)** <br> **a.** `grant_type`: String, value must be `password` <br> **b.** `username`: String (i.e. `warrenwevicknocos@gmail.com`) <br> **c.** `password`: String (i.e. `1234`) |
 
 Sample syntax using `curl`:
 
