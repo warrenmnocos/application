@@ -63,7 +63,7 @@ With this architecture, the application is prepared for additional services to c
 
 ###Class Diagram
 
-![Figure 2: Account business model](https://s10.postimg.org/qrb5q49ll/class_diagram.png)
+![Figure 2: Account business model](https://s22.postimg.org/j84tb1bi9/class_diagram.png)
 
 ---
 Output
