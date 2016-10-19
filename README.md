@@ -162,7 +162,7 @@ bf65c68f577d        application-config:1.0   "java -jar /app.war"   12 seconds a
 
 The `account-application` service provides a service that populates records on the database at runtime when `application.account.service.populate-database` property flag is set to `true`.  This is set depending on which `profile` the application activates. 
 
-> Spring has a notion of **profiles**, which provide a way to segregate parts of application configuration and make it only available in certain environments (e.g. `development`, `test`, or `production`).
+> Spring has a notion of **profiles**, which provides a way to segregate parts of application configuration and make it only available in certain environments (e.g. `development`, `test`, or `production`).
 
 If the application is in `production` mode, with the help of the configuration server (in `application-config`), this setting can be activated, or deactivated after the database is populated. It is also possible to refresh the `application-account` to reflect this changes at runtime while the application is running and without bringing it down with the help of Spring Boot Actuator's `/refresh` endpoint, which basically reloads all beans with `refresh` scope (annotated with `@RefreshScope` annotation).
 
